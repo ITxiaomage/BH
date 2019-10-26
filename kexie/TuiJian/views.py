@@ -17,7 +17,7 @@ from apscheduler.scheduler import Scheduler
 sched = Scheduler()  # 实例化，固定格式
 
 
-@sched.interval_schedule(seconds=180)  # 装饰器，seconds=60意思为该函数为1分钟运行一次
+@sched.interval_schedule(hours=8)  # 装饰器，seconds=60意思为该函数为1分钟运行一次
 def mytask():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     #科协一家
