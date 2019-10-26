@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新闻列表</title>
+</head>
+
+<body>
+<ul>
+    {% for new in news_list %}
+        <h2>标题：{{ new.title }}</h2>
+        <h3>图片链接：{{ new.img }}</h3>
+        <span><img src={{ new.img }}> </span>
+        <div>
+            <p>内容</p>
+            <div class=" content">
+                {{ new.content|safe }}
+            </div>
+        </div>
+        <h3>时间：{{ new.time }}</h3>
+        <h3>来源：{{ new.source }}</h3>
+
+    {% endfor %}
+</ul>
+</body>
+</html>
