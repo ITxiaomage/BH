@@ -29,7 +29,7 @@ urlpatterns = [
     #debug = False的情况，需要增加如下
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     #path('admin/', admin.site.urls),
-    path('ueditor/',include('DjangoUeditor.urls')),
+    #path('ueditor/',include('DjangoUeditor.urls')),
     #路由转发
     path('api/recommendation/',include('TuiJian.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
