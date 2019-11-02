@@ -28,7 +28,7 @@ def mytask():
     # 科协官网
     update_kexie_news_into_mysql()
     # cast数据库
-    #hanle_cast_into_mysql()
+    hanle_cast_into_mysql()
     # 人名网时政
     updata_get_rmw_news_data()
     # 人民网科技
@@ -433,9 +433,9 @@ def search_kx_data_from_mysql(flag=0):
 
     # 通知，flag = 0 三条 flag = 1 10条
     if not flag:
-        temp_list = search_data_from_mysql(myModel=KX, n=LIMIT_NEWS, label=1)
+        temp_list = search_data_from_mysql(myModel=KX, n=LIMIT_NEWS, label=3)
     else:
-        temp_list = search_data_from_mysql(myModel=KX, n=MAX_NEWS_NUMBER, label=1)
+        temp_list = search_data_from_mysql(myModel=KX, n=MAX_NEWS_NUMBER, label=3)
     result_dict['notices'] = temp_list
     # 视频  flag = 0 三条 flag = 1 10条
     if not flag:
