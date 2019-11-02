@@ -6,7 +6,7 @@ from django.core.validators import MaxValueValidator,MinValueValidator
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User, PermissionsMixin
-from DjangoUeditor.models import UEditorField
+#from DjangoUeditor.models import UEditorField
 
 from xadmin.plugins.auth import User
 # model.pys
