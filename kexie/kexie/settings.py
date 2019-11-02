@@ -12,10 +12,11 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import pymysql
+import  sys
 pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+sys.path.insert(0,os.path.join(BASE_DIR,'apps_extra'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/pip
@@ -39,8 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'TuiJian',
+    #'DjangoUeditor',  # 百度的文本编辑器
     'ckeditor',
     'ckeditor_uploader', # 富文本编辑器上传图片模块
+    'xadmin',
+    'crispy_forms',
+    #'reversion',版本控制
+    'rules',
 ]
 
 MIDDLEWARE = [
@@ -128,33 +134,40 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR,'static/')
-STATIC_URL = '/static/'
+#STATIC_ROOT = 'static'
 
 CKEDITOR_JQUERY_URL ='https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js'
 
-CKEDITOR_CONFIGS = {'default':
-                        {'toolbar': 'full',
-                         'height': 1000,
-                         'width': 1000,
-                         },
-                    }
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 MEDIA_URL = '/media/'
+
+
+MEDIA_DIRS = (
+    os.path.join(BASE_DIR, 'media')
+
+)
+
 CKEDITOR_UPLOAD_PATH = 'upload/'
 CKEDITOR_IMAGE_BACKEND = "pillow"
+
 CKEDITOR_CONFIGS = {
     # django-ckeditor默认使用default配置
     'default': {
         # 编辑器宽度
-        'width':'1000px',
-        'height':'500px',
+        'width':'100%',
+        'height':'800px',
         # tab键转换空格数
         'tabSpaces': 4,
         # 工具栏风格
-        'toolbar': 'Custom',
+        'toolbar': 'full',
         # 加入代码块插件
         'extraPlugins': ','.join(['codesnippet']),
     }
 }
-
+#rules添加的
+AUTHENTICATION_BACKENDS = (
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)

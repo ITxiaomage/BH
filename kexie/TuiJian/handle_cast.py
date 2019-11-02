@@ -20,12 +20,10 @@ def sz_kj():
     for one in data:
         print(one)
         sql = "select * from {0} where source ='{1}'order by time  desc  limit 1000".format(table, one)
-        print(sql)
         try:
             cursor.execute(sql)
             all_news = cursor.fetchall()
             for one_news in all_news:
-                print(one_news)
                 title,url,content,img,news_time,author,keywords,source = one_news[1], one_news[2], one_news[3], one_news[4], one_news[5], one_news[6], one_news[7], one_news[8]
                 # 数据封装进字典
                 result_list.append(package_data_dict(title, url, content, news_time, source))
@@ -180,11 +178,11 @@ def handle_website_xuehui( data, table,cursor):
                 #处理日期
                 date = datetime.datetime.now().strftime('%Y-%m-%d')
                 #数据封装进字典
-                result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=source))
+                result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=source,tag = 2))
 
         except :
             print('出现错误')
-
+    print(result_list)
     return result_list
 
 #处理地方科协的
@@ -214,12 +212,12 @@ def handle_website_shenghui( data, table,cursor):
                 else:
                     date = datetime.datetime.now().strftime('%Y-%m-%d')
                 #数据封装进字典
-                result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=quan_source))
+                result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=quan_source,tag = 1))
 
         except Exception as err:
             print(err)
             print('出现错误')
-
+    print(result_list)
     return result_list
 
 #处理参数是一个列表
@@ -272,7 +270,7 @@ def handle_wechat_xuehui( data, table,cursor):
                 else:
                     date = datetime.datetime.now().strftime('%Y-%m-%d')
                 #数据封装进字典
-                result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=source))
+                result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=source,tag =2))
 
         except :
             print('出现错误')
@@ -306,7 +304,7 @@ def handle_wechat_shenghui( data, table,cursor):
                 else:
                     date = datetime.datetime.now().strftime('%Y-%m-%d')
                 #数据封装进字典
-                result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=quan_source))
+                result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=quan_source,tag =1))
 
         except :
             print('出现错误')
@@ -315,7 +313,6 @@ def handle_wechat_shenghui( data, table,cursor):
 #处理参数是一个列表
 def handle_wechat_list(data, table,cursor):
     result_list=[]
-    result_dict = {}
     for one in data :
         print(one)
         sql = "select * from {0} where 来源='{1}'order by 日期 desc limit 100 ".format(table,one)
@@ -338,8 +335,8 @@ def handle_wechat_list(data, table,cursor):
         except :
             print('出现错误')
     return result_list
-
-def package_data_dict(title=None, url=None, img =None,content=None, date=None, source=None):
+#tag = 1 代表的是地方科协，tag =2 代表的是全国学会
+def package_data_dict(title=None, url=None, img =None,content=None, date=None, source=None,tag = None):
     temp_dict = {}
     keywords = TF_IDF(content,MAX_KEYWORDS)
     if len(keywords) > 4:
@@ -350,6 +347,20 @@ def package_data_dict(title=None, url=None, img =None,content=None, date=None, s
         temp_dict['time'] = date
         temp_dict['author'] = ''
         temp_dict['keywords'] = ' '.join(keywords)
+        if tag == 1:
+            try:
+                source = AgencyDfkx.objects.filter(department=source)[0]
+            except Exception as err:
+                print(err)
+                source = None
+                print('地方科协来源错误')
+        if tag == 2:
+            try:
+                source = AgencyQgxh.objects.filter(department=source)[0]
+            except Exception as err:
+                print(err)
+                source = None
+                print('全国学会来源错误')
         temp_dict['source'] = source
     return temp_dict
 

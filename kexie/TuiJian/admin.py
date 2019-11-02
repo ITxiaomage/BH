@@ -12,7 +12,6 @@ from django import forms
 from .forms import *
 import datetime
 
-
 class OrgBaseClass(admin.ModelAdmin):
     # 显示的字段
     list_display = ['number', 'department']
@@ -28,22 +27,23 @@ class OrgBaseClass(admin.ModelAdmin):
     #排序
     ordering = ('id',)
     #设置普通用户不可编辑字段，指进入详情也不可编辑
-    def get_readonly_fields(self, request, obj=None):
-        """  重新定义此函数，限制普通用户所能修改的字段  """
-        if request.user.is_superuser:
-            self.readonly_fields = []
-        return self.readonly_fields
-    readonly_fields = ('number', 'department')
+    # def get_readonly_fields(self, request, obj=None):
+    #     """  重新定义此函数，限制普通用户所能修改的字段  """
+    #     if request.user.is_superuser:
+    #         self.readonly_fields = []
+    #     return self.readonly_fields
+    # readonly_fields = ('number', 'department')
 
-class  NewsBaseClass ( admin.ModelAdmin ) :
+class  NewsBaseClass (admin.ModelAdmin) :
+
 
     #设置普通用户不可编辑字段，指进入详情也不可编辑
-    def get_readonly_fields(self, request, obj=None):
-        """  重新定义此函数，限制普通用户所能修改的字段  """
-        if request.user.is_superuser:
-            self.readonly_fields = []
-        return self.readonly_fields
-    readonly_fields = ('like', 'comment')
+    # def get_readonly_fields(self, request, obj=None):
+    #     """  重新定义此函数，限制普通用户所能修改的字段  """
+    #     if request.user.is_superuser:
+    #         self.readonly_fields = []
+    #     return self.readonly_fields
+    # readonly_fields = ('like', 'comment')
 
     #显示缩略图
     def img_data(self, obj):
@@ -57,7 +57,7 @@ class  NewsBaseClass ( admin.ModelAdmin ) :
     img_data.short_description = '新闻图片'
 
     # 显示的字段
-    list_display = ['title','img_data','time', 'source','priority', 'hidden']
+    list_display = ['title','img_data','time','priority', 'hidden']
     list_editable = ['priority', 'hidden']
     #每页显示的数量
     list_per_page = 30
@@ -66,7 +66,7 @@ class  NewsBaseClass ( admin.ModelAdmin ) :
     def my_time(self,request,obj):
         return render(request,'news.html',{'news_list':obj})
 
-    list_display_links = ['title','source',"time"]
+    list_display_links = ['title',"time"]
 
     #设置空值
     empty_value_display ='无'
@@ -74,12 +74,12 @@ class  NewsBaseClass ( admin.ModelAdmin ) :
     actions_on_top = True
 
     #搜索器
-    search_fields = ['title', 'time', 'source','content']
+    search_fields = ['title', 'time', 'content']
     #跳转字段
     #fields = ['time']
     #分组显示
     fieldsets = (
-        ('基本', {'fields': ['title', 'img','time','source']}),
+        ('基本', {'fields': ['title', 'img','time']}),
         ('高级', {
             'fields': ['content','like', 'comment','url','author','label','hidden','keywords'],
             'classes': ('collapse',)  # 是否折叠显示
@@ -101,7 +101,7 @@ class  NewsBaseClass ( admin.ModelAdmin ) :
             if self.value():
                 return queryset.filter(time__exact=self.value())
     #过滤器
-    list_filter = ['source',VersionFilter]
+    list_filter = [VersionFilter]
 
     #自定义的action函数
     # 新建一个批量操作的函数，其中有三个参数：

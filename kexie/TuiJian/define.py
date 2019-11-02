@@ -12,11 +12,11 @@ jiggou_path = r'/home/BH_TuiJian/kexie/机构.xls'
 #每篇文章提取的关键字最大数，用户设置用户画像
 MAX_KEYWORDS = 10
 #中国科协每个新闻的限制数量
-LIMIT_NEWS = 5
+LIMIT_NEWS = 3
 #提取的新闻的最大数量
 MAX_NEWS_NUMBER = 10
 #去数据库检索数据的最大值
-MAX_SEARCH_NEWS= 1000
+MAX_SEARCH_NEWS= 500
 #定义一周的时间
 WEEK= 7
 
@@ -34,17 +34,6 @@ CHANNEL_KJRD='科技热点'
 #定义中国科协
 CHANNEL_ZGKX='中国科协'
 
-
-#科协头条
-KXTT='头条'
-#科协要闻
-KXYW='要闻'
-#科协通知
-KXTZ='通知'
-#科协视频
-KXSP = '视频'
-#轮播图
-LB= '轮播'
 
 #定义办公厅ID
 BGT= '2000000309'
@@ -64,7 +53,7 @@ MIN_SIMILIAR = 0.2
 INIT_SCORE = 50
 
 #汉明距离值
-SIMHASH_DISTINCT = 20
+SIMHASH_DISTINCT = 10
 kexie_leader = {
             "万钢":100,
             "怀进鹏":100,
@@ -91,3 +80,6 @@ kexie_leader = {
             "高松":100,
             "潘建伟":100
         }
+
+
+

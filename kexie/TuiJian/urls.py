@@ -19,6 +19,8 @@ urlpatterns = [
     #获取置顶的中央领导人接口
     path('chinaNews', views.get_china_top_news, name="chinaTopNews"),
 
+    path('example', views.example, name="example"),
+
     # # 更新置顶的中央新闻入库
     # path('ctnNews', views.update_china_top_news, name="ctn"),
     #

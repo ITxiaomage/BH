@@ -14,12 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path,include,re_path
 from django.conf import settings
-from django.conf.urls.static import static
+
+from django.conf.urls.static import serve,static
 import os
+import xadmin
+xadmin.autodiscover()
+
+#from xadmin.plugins import xversion
+#xversion.register_models()
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(r'KxNewsAdmin/', xadmin.site.urls),
+    #debug = False的情况，需要增加如下
+    re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+    #path('admin/', admin.site.urls),
+    path('ueditor/',include('DjangoUeditor.urls')),
     #路由转发
     path('api/recommendation/',include('TuiJian.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),

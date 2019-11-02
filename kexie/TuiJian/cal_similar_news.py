@@ -32,10 +32,13 @@ def similar_news(news_id):
             label = one[2]
     else:
         return []
-    if label == '视频':
-        video_data = mymodels.objects.filter(label='视频').order_by('-time')[:50].values_list('id', 'time', 'source', 'title',
-                                                                                  'img', 'content',"keywords")
-        cur_keywords = TF_IDF(str(title), 10)
+    if label == 4:
+        video_data = mymodels.objects.filter(label=4).order_by('-time')[:50].values_list('id', 'time', 'source', 'title',
+                                                                               'img', 'content',"keywords")
+        cur_keywords = []
+        for one_video_data in video_data:
+            cur_keywords = ' '.join(one_video_data[6])
+
         cur_vec = cal_d2v(cur_keywords)
         for one_data in video_data:
             temp_dict = {}
@@ -47,7 +50,7 @@ def similar_news(news_id):
             score = xiangsidu(cur_vec, temp_vec)
             if score > 0.2 and score < 0.95:
                 temp_dict['news_id'] = str(mymodels._meta.db_table )+ '_'+ str(one_data[0])
-                temp_dict['news_time'] = one_data[1]
+                temp_dict['news_time'] = str(one_data[1])
                 temp_dict['news_source'] = one_data[2]
                 temp_dict['news_title'] = one_data[3]
                 temp_dict['news_img'] = one_data[4]
@@ -55,9 +58,12 @@ def similar_news(news_id):
                 result_list.append(temp_dict)
     else:
         #当前新闻的内容
+
         content_data = mymodels.objects.all().order_by('-time')[:50].values_list('id', 'time', 'source', 'title',
                                                                                   'img', 'content',"keywords")
-        cur_keywords =  TF_IDF(str(content),10)
+        cur_keywords = []
+        for one_content_data in content_data:
+            cur_keywords = ' '.join(one_content_data[6])
         cur_vec = cal_d2v(cur_keywords)
         for one_data in content_data:
             temp_dict = {}
@@ -69,8 +75,8 @@ def similar_news(news_id):
 
             if score > 0.4 and score < 0.95:
                 temp_dict['news_id'] = str(mymodels._meta.db_table )+ '_'+ str(one_data[0])
-                temp_dict['news_time'] = one_data[1]
-                temp_dict['news_source'] = one_data[2]
+                temp_dict['news_time'] = str(one_data[1])
+                temp_dict['news_source'] = get_short_source(mymodels, one_data[2])
                 temp_dict['news_title'] = one_data[3]
                 temp_dict['news_img'] = one_data[4]
                 temp_dict['news_score'] = score
@@ -83,7 +89,31 @@ def similar_news(news_id):
     else:
         result_list = temp_list
     return result_list
+# 拿到source
+def get_short_source(myModel, source):
+    if myModel == QGXH:
+        try:
+            temp_source = AgencyQgxh.objects.filter(hidden=1).filter(department=source).values_list('short')[0][0]
+        except:
+            temp_source = source
 
+    elif myModel == DFKX:
+        try:
+            temp_source = AgencyDfkx.objects.filter(hidden=1).filter(department=source).values_list('short')[0][0]
+        except:
+            temp_source = source
+
+    elif myModel == KX:
+        try:
+            temp_source = AgencyJg.objects.filter(hidden=1).filter(department=source).values_list('short')[0][0]
+        except:
+            temp_source = source
+    else:
+        temp_source = source
+    if temp_source:
+        return temp_source
+    else:
+        return source
 #根据db_table获取模型名字
 def table_to_models(db_table):
     #只能用这种方法了
