@@ -102,7 +102,7 @@ def get_user_news_list(request):
         user_id = request.GET.get('user_id')
     except Exception as err:
         print("获取用户id出现错误")
-        user_id = None
+        user_id = '999'
         print(err)
     # 获取用户department列表
     try:
@@ -118,7 +118,7 @@ def get_user_news_list(request):
     if user_id:
         result_list = accord_user_id_get_news_list(user_id, department, channel, flag)
     else:  # 没有用户id,就按照部门推送，不进行用户画像记录
-        result_list = channel_branch(channel, branch)
+        result_list = channel_branch(channel, branch, flag)
     return HttpResponse(json.dumps(result_list, ensure_ascii=False))
 
 
@@ -369,7 +369,7 @@ def get_dfkx_news_list(department):
 
 
 # 根据部门和频道获
-def channel_branch(channel, branch):
+def channel_branch(channel, branch, flag=0):
     result_list = []
     # 根据频道得到数据库表名
     db_table = ChannelToDatabase.objects.filter(channel=channel).values_list('database')
