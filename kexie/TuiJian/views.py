@@ -102,8 +102,10 @@ def get_user_news_list(request):
         user_id = request.GET.get('user_id')
     except Exception as err:
         print("获取用户id出现错误")
-        user_id = '999'
+        user_id = None
         print(err)
+    if not user_id:
+        user_id = '999'
     # 获取用户department列表
     try:
         department = request.GET.get('department')
@@ -113,7 +115,6 @@ def get_user_news_list(request):
         print("获取用户department列表出现错误")
         department = []
         print(err)
-
     # 有用户id就按照用户id推送，并进行用户画像记录
     if user_id:
         result_list = accord_user_id_get_news_list(user_id, department, channel, flag)
@@ -415,6 +416,7 @@ def channel_branch(channel, branch, flag=0):
 def search_kx_data_from_mysql(flag=0):
     result_dict = {}
     result_list = []
+
     # 直接搜索10条新闻
     result_list.extend(search_data_from_mysql(myModel=KX, n=MAX_NEWS_NUMBER, label=1))
     # 就这十条数据，还是按照领导人数据排个序吧
