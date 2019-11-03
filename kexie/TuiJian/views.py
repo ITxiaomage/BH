@@ -82,14 +82,14 @@ def get_user_news_list(request):
         print(err)
 
     # 获取部门错误就设置为第一个部门
-    try:
-        branch = request.GET.get('branch')
-        if branch not in num_dfkx() and branch not in num_kxjg() and branch not in num_xuehui():
-            branch = AgencyJg.objects.all().values_list('department')[0][0]
-    except Exception as err:
-        branch = AgencyJg.objects.all().values_list('department')[0][0]
-        print("获取部门出现错误，因此设为默认值:{0}".format(branch))
-        print(err)
+    # try:
+    #     branch = request.GET.get('branch')
+    #     if branch not in num_dfkx() and branch not in num_kxjg() and branch not in num_xuehui():
+    #         branch = AgencyJg.objects.all().values_list('department')[0][0]
+    # except Exception as err:
+    #     branch = AgencyJg.objects.all().values_list('department')[0][0]
+    #     print("获取部门出现错误，因此设为默认值:{0}".format(branch))
+    #     print(err)
     try:
         flag = request.GET.get('flag')
     except Exception as err:
@@ -116,10 +116,9 @@ def get_user_news_list(request):
         department = []
         print(err)
     # 有用户id就按照用户id推送，并进行用户画像记录
-    if user_id:
-        result_list = accord_user_id_get_news_list(user_id, department, channel, flag)
-    else:  # 没有用户id,就按照部门推送，不进行用户画像记录
-        result_list = channel_branch(channel, branch, flag)
+    result_list = accord_user_id_get_news_list(user_id, department, channel, flag)
+    # else:  # 没有用户id,就按照部门推送，不进行用户画像记录
+    #     result_list = channel_branch(channel, branch, flag)
     return HttpResponse(json.dumps(result_list, ensure_ascii=False))
 
 
@@ -167,6 +166,7 @@ def individual(user_id, channel, ):
         return second_result_list
     # 有用户就根据用户画像检索新闻
     user_images_dict = get_user_images_accord_user_id_channel(user_id, channel)
+    print(user_id, channel)
     result_list.extend(get_news_list_accord_user_images(mymodels, user_images_dict))
     if len(result_list) > MAX_NEWS_NUMBER:
         final_result_list = result_list[:MAX_NEWS_NUMBER]
@@ -211,12 +211,10 @@ def get_news_list_accord_user_images(mymodels, user_images_dict):
         second_result_list = sorted(result_list, key=itemgetter('priority', 'news_time', 'news_score'), reverse=True)
     else:
         second_result_list = []
-    for one in second_result_list:
-        print(one)
     final_result_list = []
+    # 在这里将结果利用simhash去重
+    final_result_list.extend(simhash_remove_similar(second_result_list))
     while True:
-        # 在这里将结果利用simhash去重
-        final_result_list.extend(simhash_remove_similar(second_result_list))
         # 新闻数量不够就一直补充
         if len(final_result_list) < MAX_NEWS_NUMBER:
             get_enough_news(final_result_list, mymodels)
@@ -465,10 +463,13 @@ def get_enough_news(news_list, mymodels):
             index = news_id.rindex("_")
             number = news_id[index + 1:]
             id_list.append(int(number))
-        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list))
-        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=1))
-        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=2))
-        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=3))
+        # 时政频道一次补充十条进去
+        if mymodels == News:
+            news_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, id__list=id_list))
+        # 其他频道按照123补充
+        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=1))
+        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=2))
+        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=3))
 
 
 # 刚开始过滤掉一周以前的新闻
@@ -536,9 +537,15 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
     else:
         try:
-            data = myModel.objects.filter(hidden=1).filter(source=source).values_list('id', 'title', 'img', 'time',
-                                                                                      'source', 'comment', 'like',
-                                                                                      'priority', 'label').order_by(
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).values_list('id',
+                                                                                                               'title',
+                                                                                                               'img',
+                                                                                                               'time',
+                                                                                                               'source',
+                                                                                                               'comment',
+                                                                                                               'like',
+                                                                                                               'priority',
+                                                                                                               'label').order_by(
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
@@ -630,7 +637,7 @@ def news_content(request):
 
             else:
                 keyword_lsit = news_info_dict['keywords_list'].split(' ')
-            record_user_image(user_id, cur_channel,keyword_lsit)
+            record_user_image(user_id, cur_channel, keyword_lsit)
     # 取出字典里的关键词列表
     if news_info_dict:
         news_info_dict.pop("keywords_list")
