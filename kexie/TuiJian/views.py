@@ -214,12 +214,10 @@ def get_news_list_accord_user_images(mymodels, user_images_dict):
     final_result_list = []
     # 在这里将结果利用simhash去重
     final_result_list.extend(simhash_remove_similar(second_result_list))
-    while True:
-        # 新闻数量不够就一直补充
-        if len(final_result_list) < MAX_NEWS_NUMBER:
-            get_enough_news(final_result_list, mymodels)
-        else:
-            break
+
+    if len(final_result_list) < MAX_NEWS_NUMBER:
+        get_enough_news(final_result_list, mymodels)
+
     final_result_list = sorted(final_result_list, key=itemgetter('priority', 'news_time'), reverse=True)
     return final_result_list
 
@@ -455,7 +453,6 @@ def get_enough_news(news_list, mymodels):
         num_news = len(news_list)
         if num_news >= MAX_NEWS_NUMBER:
             break
-        n = (MAX_NEWS_NUMBER - num_news)
         # 现获取到信息的id
         id_list = []
         for one_news in news_list:
