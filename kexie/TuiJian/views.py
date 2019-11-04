@@ -328,8 +328,6 @@ def get_qgxh_news_list(department):
         result_list.extend(search_data_from_mysql(QGXH))
     final_result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
     while True:
-        # 在这里将结果利用simhash去重
-        final_result_list.extend(simhash_remove_similar(result_list))
         # 新闻数量不够就一直补充
         if len(final_result_list) < MAX_NEWS_NUMBER:
             get_enough_news(final_result_list, QGXH)
@@ -449,24 +447,21 @@ def search_kx_data_from_mysql(flag=0):
 
 # 补充到足够数量的新闻+
 def get_enough_news(news_list, mymodels):
-    while True:
-        num_news = len(news_list)
-        if num_news >= MAX_NEWS_NUMBER:
-            break
-        # 现获取到信息的id
-        id_list = []
-        for one_news in news_list:
-            news_id = one_news['news_id']
-            index = news_id.rindex("_")
-            number = news_id[index + 1:]
-            id_list.append(int(number))
-        # 时政频道一次补充十条进去
-        if mymodels == News:
-            news_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, id__list=id_list))
-        # 其他频道按照123补充
-        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=1))
-        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=2))
-        news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=3))
+    num_news = len(news_list)
+    if num_news >= MAX_NEWS_NUMBER:
+        return
+    # 现获取到信息的id
+    id_list = []
+    for one_news in news_list:
+        news_id = one_news['news_id']
+        index = news_id.rindex("_")
+        number = news_id[index + 1:]
+        id_list.append(int(number))
+    news_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, id__list=id_list))
+    # # 其他频道按照123补充
+    # news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=1))
+    # news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=2))
+    # news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=3))
 
 
 # 刚开始过滤掉一周以前的新闻
