@@ -104,6 +104,7 @@ def get_user_news_list(request):
         print("获取用户id出现错误")
         user_id = None
         print(err)
+    # 临时修改为默认用户
     if not user_id:
         user_id = '999'
     # 获取用户department列表
@@ -116,6 +117,7 @@ def get_user_news_list(request):
         department = []
         print(err)
     # 有用户id就按照用户id推送，并进行用户画像记录
+    print(channel)
     result_list = accord_user_id_get_news_list(user_id, department, channel, flag)
     # else:  # 没有用户id,就按照部门推送，不进行用户画像记录
     #     result_list = channel_branch(channel, branch, flag)
@@ -150,17 +152,18 @@ def individual(user_id, channel, ):
     db_table = ChannelToDatabase.objects.filter(channel=channel).values_list('database')
     # 根据数据库表名获取到模型
     mymodels = table_to_models(db_table[0][0])
-
+    print(channel, db_table, mymodels)
     # 先检测用户是否存在，不存在就创建新的用户，按照时间返回新闻
     user = search_user_from_momgodb(id=user_id)
     # 如果没有此用户，则创建新的用户
-    if not user:
+    #临时修改为默认用户
+    if user == '999':
         create_new_user_in_mongo(user_id=user_id)
-        # 没有用户，返回每个label最新的三条
-        result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS))
-        result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=1))
-        result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=2))
-        result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=3))
+        # 没有用户，返回每个label最新的10条
+        result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER))
+        result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=1))
+        result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2))
+        result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=3))
         # 然后按照时间排序
         second_result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
         return second_result_list
@@ -214,11 +217,13 @@ def get_news_list_accord_user_images(mymodels, user_images_dict):
     final_result_list = []
     # 在这里将结果利用simhash去重
     final_result_list.extend(simhash_remove_similar(second_result_list))
-
+    print('通过用户画像返回的新闻列表长度:{0}'.format(len(final_result_list)))
     if len(final_result_list) < MAX_NEWS_NUMBER:
         get_enough_news(final_result_list, mymodels)
 
     final_result_list = sorted(final_result_list, key=itemgetter('priority', 'news_time'), reverse=True)
+
+    print('补充数据返回的新闻列表长度:{0}'.format(len(final_result_list)))
     return final_result_list
 
 
