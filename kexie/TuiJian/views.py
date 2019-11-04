@@ -156,14 +156,16 @@ def individual(user_id, channel, ):
     # 先检测用户是否存在，不存在就创建新的用户，按照时间返回新闻
     user = search_user_from_momgodb(id=user_id)
     # 如果没有此用户，则创建新的用户
-    #临时修改为默认用户
+    #临时修改为默认用户，频道等于时政要闻
     if user == '999':
-        create_new_user_in_mongo(user_id=user_id)
+        #create_new_user_in_mongo(user_id=user_id)
         # 没有用户，返回每个label最新的10条
-        result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER))
-        result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=1))
-        result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2))
-        result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=3))
+        if channel == CHANNEL_SZYW:
+            result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER))
+        else:
+            result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=1))
+            result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=2))
+            result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=3))
         # 然后按照时间排序
         second_result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
         return second_result_list
