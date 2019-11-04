@@ -127,7 +127,10 @@ def get_user_news_list(request):
 # 根据用户id和department和channel获取到新闻推荐的列表
 def accord_user_id_get_news_list(user_id, department, channel, flag):
     # 在时政要闻和科技热点进行个性化推荐
-    if channel == CHANNEL_SZYW or channel == CHANNEL_KJRD:
+    #临时修改一下规则：
+    if channel == CHANNEL_SZYW:
+        result_list = (search_data_from_mysql(News, MAX_NEWS_NUMBER))
+    elif  channel == CHANNEL_KJRD:
         result_list = individual(user_id, channel)
     # 中国科协
     elif channel == CHANNEL_ZGKX:
