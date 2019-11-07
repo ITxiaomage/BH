@@ -23,6 +23,7 @@ def create_new_user_in_mongo(user_id):
     client = pymongo.MongoClient()
     db = client[MONGODB_DB]
     collection = db[USER_IMAGE]
+    collection.create_index([("id", 1)], unique=True)
     # 先初始化一个用户画像
     user_init_images = init_user_image(user_id)
     try:
@@ -86,7 +87,7 @@ def update_mongo_accord_user_id(user, channel_list):
         client = pymongo.MongoClient()
         db = client[MONGODB_DB]
         collection = db[USER_IMAGE]
-        collection.update_one({"id": user_id}, {'$set': {'channelList': channel_list}})
+        collection.update_one({"id": user_id}, {'$set': {'channelList': channel_list}}, True)
     except Exception as err:
         print('更新mongodb中的用户画像失败')
         print(err)
