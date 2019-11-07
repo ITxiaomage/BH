@@ -8,8 +8,8 @@ from .define import w2v_path_model
 import random
 
 # 加载进训练好的模型
-#model = gensim.models.Word2Vec.load(w2v_path_model)
-model = ''
+model = gensim.models.Word2Vec.load(w2v_path_model)
+#model = ''
 
 
 def similar_news(news_id):

@@ -3,11 +3,11 @@
 IMG = 'http://www.gov.cn/xinwen/site1/20140905/18037327d8e41573fa3901.jpg'
 
 #训练好的词向量模型路径
-w2v_path_model ='E:\推荐相关\model/w2v.model'
-#w2v_path_model ='/home/BH_TuiJian/kexie/w2v.model'
+#w2v_path_model ='E:\推荐相关\model/w2v.model'
+w2v_path_model ='/home/BH_TuiJian/kexie/w2v.model'
 #存放科协机构的文件路径
 #jiggou_path = r'E:\推荐相关\机构.xls'
-#jiggou_path = r'/home/BH_TuiJian/kexie/机构.xls'
+jiggou_path = r'/home/BH_TuiJian/kexie/机构.xls'
 
 #每篇文章提取的关键字最大数，用户设置用户画像
 MAX_KEYWORDS = 10
