@@ -146,10 +146,10 @@ def individual(user_id, channel, mymodel):
 # 数据库的种类都查询5条 排序返回
 def accord_label_get_news(mymodels):
     result_list = []
-    result_list.extend(search_data_from_mysql(mymodels, 5, label=1))
-    result_list.extend(search_data_from_mysql(mymodels, 5, label=2))
-    result_list.extend(search_data_from_mysql(mymodels, 5, label=3))
-    result_list.extend(search_data_from_mysql(mymodels, 5, label=4))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=1))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=3))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=4))
     temp_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
     return limit_ten_news(temp_list)
 
