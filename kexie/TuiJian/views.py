@@ -5,21 +5,24 @@ from . import initData
 from . import handle_cast
 from .organiza import *
 from .mongo import *
-from .cal_similar_news import *
+from .calSimilarNews import *
 from datetime import datetime
 from operator import itemgetter
 import json
 from simhash import Simhash
 from django.db.models import Q
+from . import CommonMethod
 
 ####################################定时任务#########################
 from apscheduler.scheduler import Scheduler
 
-sched = Scheduler()  # 实例化，固定格式
+sched_1 = Scheduler()  # 实例化，固定格式
+sched_2 = Scheduler()  # 实例化，固定格式
 
 
-@sched.interval_schedule(hours=5)  # 装饰器，seconds=60意思为该函数为1分钟运行一次
-def mytask():
+#  五个小时更新一次
+@sched_1.interval_schedule(hours=5)
+def mytask_1():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # 科协一家
     update_kxyj_data()
@@ -27,8 +30,7 @@ def mytask():
     update_china_top_news()
     # 科协官网
     update_kexie_news_into_mysql()
-    # cast数据库
-    hanle_cast_into_mysql()
+
     # 人名网时政
     updata_get_rmw_news_data()
     # 人民网科技
@@ -36,33 +38,18 @@ def mytask():
     print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
 
 
-sched.start()  # 启动该脚本
+#  每天更新一次
+@sched_2.interval_schedule(days=1)
+def mytask__2():
+    print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
+    # cast数据库
+    hanle_cast_into_mysql()
+    print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
 
 
-# 开启定时任务
-# try:
-#     #实例化调度器
-#     scheduler = BackgroundScheduler()
-#     scheduler.add_jobstore(DjangoJobStore(),'default')
-#     @register_job(scheduler,"interval",hours = 8)
-#     def my_job():
-#         print('定时任务启动,时间为：{0}'.format(datetime.datetime.now().strftime("%Y-%m-%d")))
-#         # 中央新闻
-#         update_china_top_news()
-#         # 科协官网
-#         update_kexie_news_into_mysql()
-#         # cast数据库
-#         hanle_cast_into_mysql()
-#         # 人名网时政
-#         updata_get_rmw_news_data()
-#         # 人民网科技
-#         update_get_rmw_kj_data()
-#         print('定时任务结束,时间为：{0}'.format(datetime.datetime.now().strftime("%Y-%m-%d")))
-#     register_events(scheduler)
-#     scheduler.start()
-# except Exception as err:
-#     print(err)
-#     scheduler.shutdown()
+sched_1.start()  # 启动该脚本
+sched_2.start()  # 启动该脚本
+
 
 def example(request):
     hanle_cast_into_mysql()
@@ -74,22 +61,13 @@ def get_user_news_list(request):
     # 获取频道错误就设置第一个频道
     try:
         channel = request.GET.get('channel')
-        if channel not in get_all_channel():
-            channel = ChannelToDatabase.objects.all().values_list('channel')[0][0]
+        # if channel not in get_all_channel():
+        #     channel = ChannelToDatabase.objects.all().values_list('channel')[0][0]
     except Exception as err:
         channel = ChannelToDatabase.objects.all().values_list('channel')[0][0]
         print("获取频道出现错误，因此设为默认值:{0}".format(channel))
         print(err)
 
-    # 获取部门错误就设置为第一个部门
-    # try:
-    #     branch = request.GET.get('branch')
-    #     if branch not in num_dfkx() and branch not in num_kxjg() and branch not in num_xuehui():
-    #         branch = AgencyJg.objects.all().values_list('department')[0][0]
-    # except Exception as err:
-    #     branch = AgencyJg.objects.all().values_list('department')[0][0]
-    #     print("获取部门出现错误，因此设为默认值:{0}".format(branch))
-    #     print(err)
     try:
         flag = request.GET.get('flag')
     except Exception as err:
@@ -117,7 +95,6 @@ def get_user_news_list(request):
         department = []
         print(err)
     # 有用户id就按照用户id推送，并进行用户画像记录
-    print(channel)
     result_list = accord_user_id_get_news_list(user_id, department, channel, flag)
     # else:  # 没有用户id,就按照部门推送，不进行用户画像记录
     #     result_list = channel_branch(channel, branch, flag)
@@ -127,11 +104,10 @@ def get_user_news_list(request):
 # 根据用户id和department和channel获取到新闻推荐的列表
 def accord_user_id_get_news_list(user_id, department, channel, flag):
     # 在时政要闻和科技热点进行个性化推荐
-    #临时修改一下规则：
     if channel == CHANNEL_SZYW:
-        result_list = (search_data_from_mysql(News, MAX_NEWS_NUMBER))
-    elif  channel == CHANNEL_KJRD:
-        result_list = individual(user_id, channel)
+        result_list = individual(user_id, channel, News)
+    elif channel == CHANNEL_KJRD:
+        result_list = individual(user_id, channel, TECH)
     # 中国科协
     elif channel == CHANNEL_ZGKX:
         result_list = search_kx_data_from_mysql(flag)
@@ -148,39 +124,38 @@ def accord_user_id_get_news_list(user_id, department, channel, flag):
 
 
 # 个性化推荐算法
-def individual(user_id, channel, ):
+def individual(user_id, channel, mymodel):
     result_list = []
-
-    # 根据频道得到数据库表名
-    db_table = ChannelToDatabase.objects.filter(channel=channel).values_list('database')
-    # 根据数据库表名获取到模型
-    mymodels = table_to_models(db_table[0][0])
-    print(channel, db_table, mymodels)
     # 先检测用户是否存在，不存在就创建新的用户，按照时间返回新闻
     user = search_user_from_momgodb(id=user_id)
-    # 如果没有此用户，则创建新的用户
-    #临时修改为默认用户，频道等于时政要闻
-    if user == '999':
-        #create_new_user_in_mongo(user_id=user_id)
-        # 没有用户，返回每个label最新的10条
-        if channel == CHANNEL_SZYW:
-            result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER))
-        else:
-            result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=1))
-            result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=2))
-            result_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, label=3))
-        # 然后按照时间排序
-        second_result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
-        return second_result_list
+
+    if not user or user_id == '999':
+        # 如果没有此用户，则创建新的用户
+        create_new_user_in_mongo(user_id)
+        # 用户不存在就按照检索10条数据create_new_user_in_mongo
+        return accord_label_get_news(mymodel)
+
     # 有用户就根据用户画像检索新闻
     user_images_dict = get_user_images_accord_user_id_channel(user_id, channel)
-    print(user_id, channel)
-    result_list.extend(get_news_list_accord_user_images(mymodels, user_images_dict))
-    if len(result_list) > MAX_NEWS_NUMBER:
-        final_result_list = result_list[:MAX_NEWS_NUMBER]
-    else:
-        final_result_list = result_list
-    return final_result_list
+    result_list.extend(get_news_list_accord_user_images(mymodel, user_images_dict))
+    return limit_ten_news(result_list)
+
+
+# 数据库的种类都查询5条 排序返回
+def accord_label_get_news(mymodels):
+    result_list = []
+    result_list.extend(search_data_from_mysql(mymodels, 5, label=1))
+    result_list.extend(search_data_from_mysql(mymodels, 5, label=2))
+    result_list.extend(search_data_from_mysql(mymodels, 5, label=3))
+    result_list.extend(search_data_from_mysql(mymodels, 5, label=4))
+    temp_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
+    return limit_ten_news(temp_list)
+
+
+def limit_ten_news(news_list):
+    if len(news_list) > MAX_NEWS_NUMBER:
+        return news_list[:MAX_NEWS_NUMBER]
+    return news_list
 
 
 # 根据用户画像返回一个新闻列表
@@ -335,16 +310,13 @@ def get_qgxh_news_list(department):
             result_list.extend(search_data_from_mysql(QGXH, source=AgencyQgxh.objects.filter(department=source)[0]))
     # 如果result_list为空，说明用户没有在全国学会兼职，那么返回数据库最新的新闻
     if not result_list:
-        result_list.extend(search_data_from_mysql(QGXH))
-    final_result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
-    while True:
-        # 新闻数量不够就一直补充
-        if len(final_result_list) < MAX_NEWS_NUMBER:
-            get_enough_news(final_result_list, QGXH)
-        else:
-            final_result_list = final_result_list[:MAX_NEWS_NUMBER]
-            break
-    return final_result_list
+        return sorted(search_data_from_mysql(QGXH), key=itemgetter('priority', 'news_time'), reverse=True)
+    # 新闻数量不够就一直补充
+    if len(result_list) < MAX_NEWS_NUMBER:
+        get_enough_news(result_list, QGXH)
+        return result_list
+    else:
+        return result_list[:MAX_NEWS_NUMBER]
 
 
 # 地方科协频道推荐算法
@@ -359,18 +331,14 @@ def get_dfkx_news_list(department):
             result_list.extend(search_data_from_mysql(DFKX, source=AgencyDfkx.objects.filter(department=source)[0]))
     # 如果result_list为空，说明用户没有在地方科协兼职，那么返回数据库最新的新闻
     if not result_list:
-        result_list.extend(search_data_from_mysql(DFKX))
-    final_result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
-    while True:
-        # 在这里将结果利用simhash去重
-        final_result_list.extend(simhash_remove_similar(result_list))
-        # 新闻数量不够就一直补充
-        if len(final_result_list) < MAX_NEWS_NUMBER:
-            get_enough_news(final_result_list, DFKX)
-        else:
-            final_result_list = final_result_list[:MAX_NEWS_NUMBER]
-            break
-    return final_result_list
+        return sorted(search_data_from_mysql(DFKX), key=itemgetter('priority', 'news_time'), reverse=True)
+
+    # 补充新闻数量
+    if len(result_list) < MAX_NEWS_NUMBER:
+        get_enough_news(result_list, QGXH)
+        return result_list
+    else:
+        return result_list[:MAX_NEWS_NUMBER]
 
 
 # 根据部门和频道获
@@ -379,11 +347,7 @@ def channel_branch(channel, branch, flag=0):
     # 根据频道得到数据库表名
     db_table = ChannelToDatabase.objects.filter(channel=channel).values_list('database')
     # 根据数据库表名获取到模型
-    mymodels = table_to_models(db_table[0][0])
-
-    # 时政频道特殊处理一下,先获取到一条置顶的新闻
-    # if channel == CHANNEL_SZYW:
-    #     result_list.extend(search_data_from_mysql(ChinaTopNews, n=1))
+    mymodels = CommonMethod.table_to_models(db_table[0][0])
 
     # 中国科协的频道单独推送
     # 如果是中国科协频道，那么必须由三部分组成：要闻、视频和通知
@@ -425,15 +389,11 @@ def search_kx_data_from_mysql(flag=0):
     result_list.extend(search_data_from_mysql(myModel=KX, n=MAX_NEWS_NUMBER, label=1))
     # 就这十条数据，还是按照领导人数据排个序吧
     kx_leaders_list = get_kx_leaders_from_mysql()
-    first_news_list = sort_kx_news(news_list=result_list, keywords_list=kx_leaders_list)
     # flag = 0 推送三条，flag  =1 时，就是点击更多，就加载10条新闻
     if not flag:
-        if len(first_news_list) > LIMIT_NEWS:
-            temp_list = first_news_list[:LIMIT_NEWS]
-        else:
-            temp_list = first_news_list
+        temp_list = sort_kx_news(news_list=result_list, keywords_list=kx_leaders_list)[:3]
     else:
-        temp_list = first_news_list
+        temp_list = sort_kx_news(news_list=result_list, keywords_list=kx_leaders_list)
     # 要闻
     result_dict['news'] = temp_list
 
@@ -450,8 +410,7 @@ def search_kx_data_from_mysql(flag=0):
         temp_list = search_data_from_mysql(myModel=KX, n=MAX_NEWS_NUMBER, label=4)
     result_dict['video'] = temp_list
     # 按照时间检索找五张img字段不为空的数据,用于轮播图 3
-    temp_list = search_data_from_mysql(myModel=KX, n=LIMIT_NEWS, LB=True)
-    result_dict['banners'] = temp_list
+    result_dict['banners'] = search_data_from_mysql(myModel=KX, n=LIMIT_NEWS, LB=True)
     return result_dict
 
 
@@ -468,10 +427,6 @@ def get_enough_news(news_list, mymodels):
         number = news_id[index + 1:]
         id_list.append(int(number))
     news_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, id__list=id_list))
-    # # 其他频道按照123补充
-    # news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=1))
-    # news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=2))
-    # news_list.extend(search_data_from_mysql(mymodels, LIMIT_NEWS, id__list=id_list, label=3))
 
 
 # 刚开始过滤掉一周以前的新闻
@@ -561,40 +516,13 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
             temp_dict['news_img'] = one[2]
             temp_dict['news_time'] = str(one[3])
             # 新闻来源要特殊处理一下，展示给用户的是新闻简称
-            temp_dict['news_source'] = get_short_source(myModel, one[4])
+            temp_dict['news_source'] = CommonMethod.get_short_source(myModel, one[4])
             temp_dict['comment'] = one[5]
             temp_dict['like'] = one[6]
             temp_dict['priority'] = one[7]
             temp_dict['label'] = one[8]
             result.append(temp_dict)
     return result
-
-
-# 拿到source
-def get_short_source(myModel, source):
-    if myModel == QGXH:
-        try:
-            temp_source = AgencyQgxh.objects.filter(hidden=1).filter(department=source).values_list('short')[0][0]
-        except:
-            temp_source = source
-
-    elif myModel == DFKX:
-        try:
-            temp_source = AgencyDfkx.objects.filter(hidden=1).filter(department=source).values_list('short')[0][0]
-        except:
-            temp_source = source
-
-    elif myModel == KX:
-        try:
-            temp_source = AgencyJg.objects.filter(hidden=1).filter(department=source).values_list('short')[0][0]
-        except:
-            temp_source = source
-    else:
-        temp_source = source
-    if temp_source:
-        return temp_source
-    else:
-        return source
 
 
 ####################################获取的中央领导人接口##################################################
@@ -624,33 +552,34 @@ def news_content(request):
         print(err)
     # 根据新闻id获取到新闻的详情
     news_info_dict = accord_news_id_get_content_list(news_id)
+    if not news_info_dict:
+        return HttpResponse(json.dumps({}, ensure_ascii=False))
     # 找到user_id才进行用户画像
-    if user_id:
-        db_table, number = get_table_and_id(news_id)
-        # 只有科技热点和时政新闻记录用户画像
-        if db_table == News._meta.db_table or db_table == TECH._meta.db_table:
-            # 根据db_table获取到频道
-            cur_channel = ChannelToDatabase.objects.filter(database=db_table).values_list('channel')[0][0]
-        else:
-            cur_channel = None
-        if cur_channel:
-            if news_info_dict:
-                keyword_lsit = []
-
+    try:
+        if user_id:
+            db_table, number = CommonMethod.get_table_and_id(news_id)
+            # 只有科技热点和时政新闻记录用户画像
+            if db_table == News._meta.db_table or db_table == TECH._meta.db_table:
+                # 根据db_table获取到频道
+                cur_channel = ChannelToDatabase.objects.filter(database=db_table).values_list('channel')[0][0]
+                keyword_list = news_info_dict['keywords_list'].split(' ')
             else:
-                keyword_lsit = news_info_dict['keywords_list'].split(' ')
-            record_user_image(user_id, cur_channel, keyword_lsit)
-    # 取出字典里的关键词列表
-    if news_info_dict:
+                cur_channel = None
+                keyword_list = []
+            record_user_image(user_id, cur_channel, keyword_list)
+    except Exception as err:
+        print('用户：{0}画像失败'.format(user_id))
+        print(err)
+    finally:
         news_info_dict.pop("keywords_list")
-    return HttpResponse(json.dumps(news_info_dict, ensure_ascii=False))
+        return HttpResponse(json.dumps(news_info_dict, ensure_ascii=False))
 
 
 # 根据新闻id,获取当前新闻的信息
 def accord_news_id_get_content_list(news_id):
-    db_table, number = get_table_and_id(news_id)
+    db_table, number = CommonMethod.get_table_and_id(news_id)
     # 根据db_table获取到models
-    mymodels = table_to_models(db_table)
+    mymodels = CommonMethod.table_to_models(db_table)
     # 查到数据
     contents = mymodels.objects.filter(id=number).values_list('content', 'like', 'comment', 'keywords', 'title', 'time',
                                                               'source')
@@ -668,17 +597,11 @@ def accord_news_id_get_content_list(news_id):
     return result_dict
 
 
-# 根据新闻id获取到数据表和在表中的id
-def get_table_and_id(news_id):
-    index = news_id.rindex('_')
-    db_table = news_id[:index]
-    number = news_id[index + 1:]
-    return db_table, number
-
-
 # 记录用户画像
 def record_user_image(user_id, cur_channel, keywords_list):
     # 根据id搜索到用户
+    if not keywords_list:
+        return
     user = search_user_from_momgodb(id=user_id)
     if user:
         # 更新用户的画像

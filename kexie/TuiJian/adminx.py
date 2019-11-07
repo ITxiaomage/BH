@@ -92,6 +92,7 @@ class NewNewsBaseClass(object):
         queryset.update(img=None)
         messages.success(request, "删除图片成功")
 
+
     del_imgs.short_description = "删除图片"
     actions = [del_imgs]
     #内部排版
@@ -137,7 +138,7 @@ class DFKXAdmin(NewNewsBaseClass):
         except:
             pass
         finally:
-            super().save_models()
+            super(DFKXAdmin, self).save_models()
 
 
 xadmin.site.register(DFKX, DFKXAdmin)
@@ -155,7 +156,7 @@ class QGXHAdmin(NewNewsBaseClass):
         except:
             pass
         finally:
-            super().save_models()
+            super(QGXHAdmin, self).save_models()
 
     # 重写queryset()或者get_list_display()，list view的权限也做到了对象级隔离
     def queryset(self):

@@ -205,6 +205,7 @@ class  NewsBaseClass (admin.ModelAdmin) :
 
 @admin.register(KxLeaders)
 class KxLeadersClass(admin.ModelAdmin):
+
     # 显示的字段
     list_display = ['name', 'hidden']
     #每页显示的数量
