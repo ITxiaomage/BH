@@ -30,13 +30,14 @@ def similar_news(news_id):
 
     # 根据label去查找相似的新闻
     news_data = mymodels.objects.filter(label=label).order_by('-time')[:100].values_list('id', 'time', 'source', 'img',
-                                                                                         'keywords')
+                                                                                         'keywords', 'title')
     temp_list = []
     for one_news in news_data:
         news_id = one_news[0]
         if news_id != number:
             simile_score = xiangsidu(cur_vec, cal_d2v(' '.join(one_news[4])))
             temp_dict = {}
+            temp_dict['news_title'] = one_news[5]
             temp_dict['news_id'] = str(mymodels._meta.db_table) + '_' + str(one_news[0])
             temp_dict['news_time'] = str(one_news[1])
             temp_dict['news_source'] = CommonMethod.get_short_source(mymodels, one_news[2])
