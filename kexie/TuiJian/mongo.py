@@ -23,7 +23,6 @@ def create_new_user_in_mongo(user_id):
     client = pymongo.MongoClient()
     db = client[MONGODB_DB]
     collection = db[USER_IMAGE]
-    collection.create_index([("id", 1)], unique=True)
     # 先初始化一个用户画像
     user_init_images = init_user_image(user_id)
     try:
@@ -38,6 +37,7 @@ def search_user_from_momgodb(id):
     db = client[MONGODB_DB]
     collection = db[USER_IMAGE]
     user = collection.find_one({"id": id})
+    print(user)
     return user
 
 

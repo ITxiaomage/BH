@@ -129,10 +129,12 @@ def individual(user_id, channel, mymodel):
     # 先检测用户是否存在，不存在就创建新的用户，按照时间返回新闻
     user = search_user_from_momgodb(id=user_id)
 
-    if not user or user_id == '999':
-        # 如果没有此用户，则创建新的用户
+    if not user:
         create_new_user_in_mongo(user_id)
+        # 如果没有此用户，则创建新的用户
+
         # 用户不存在就按照检索10条数据create_new_user_in_mongo
+    if not user or user_id == '999':
         return accord_label_get_news(mymodel)
 
     # 有用户就根据用户画像检索新闻
