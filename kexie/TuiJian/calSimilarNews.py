@@ -87,8 +87,6 @@ def cal_cos(a_vec, b_vec):
 
 # 传入两个向量·，计算两个向量的cos
 def xiangsidu(a_text_d2v, b_text_d2v):
-    print('****')
-    print(a_text_d2v, b_text_d2v)
     if a_text_d2v == "" or b_text_d2v == "":
         return 0
     else:

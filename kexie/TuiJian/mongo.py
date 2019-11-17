@@ -37,7 +37,6 @@ def search_user_from_momgodb(id):
     db = client[MONGODB_DB]
     collection = db[USER_IMAGE]
     user = collection.find_one({"id": id})
-    print(user)
     return user
 
 

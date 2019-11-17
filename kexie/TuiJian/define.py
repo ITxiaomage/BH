@@ -16,7 +16,7 @@ LIMIT_NEWS = 3
 #提取的新闻的最大数量
 MAX_NEWS_NUMBER = 10
 #去数据库检索数据的最大值
-MAX_SEARCH_NEWS= 500
+MAX_SEARCH_NEWS= 100
 #定义一周的时间
 WEEK= 7
 
