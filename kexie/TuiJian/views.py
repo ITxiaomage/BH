@@ -12,7 +12,7 @@ import json
 from simhash import Simhash
 from django.db.models import Q
 from . import CommonMethod
-
+from functools import reduce
 ####################################定时任务#########################
 from apscheduler.scheduler import Scheduler
 
@@ -169,6 +169,10 @@ def get_news_list_accord_user_images(mymodels, user_images_dict):
     """
     result_list = []
     label_list = user_images_dict['labelList']
+    label_list = sorted(label_list, key=itemgetter('flag'), reverse=True)
+    if len(label_list) > MAX_NEWS_NUMBER:
+        label_list = label_list[:MAX_NEWS_NUMBER]
+    id_list = []
     if label_list:
         for one_label in label_list:
             label = one_label['label']
@@ -180,7 +184,7 @@ def get_news_list_accord_user_images(mymodels, user_images_dict):
             for one_news in first_news_list:
                 news_id = one_news['news_id']
                 news_info = accord_news_id_get_content_list(news_id)
-                news_keywords = news_info["keywords_list"]
+                news_keywords = news_info["keywords_list"].split(' ')
                 if not news_keywords:
                     continue
                 news_keywords_vec = cal_d2v(news_keywords)
@@ -190,23 +194,32 @@ def get_news_list_accord_user_images(mymodels, user_images_dict):
                     # 这里的规则为相似性*10 +score得分
                     news_score = similar_score * 10 + score
                     one_news['news_score'] = news_score
+                    if news_id in id_list:
+                        continue
+                    id_list.append(news_id)
                     result_list.append(one_news)
     if result_list:
         # 先按优先级，然后按照时间排序，然后按照相似性排序
         second_result_list = sorted(result_list, key=itemgetter('priority', 'news_time', 'news_score'), reverse=True)
     else:
         second_result_list = []
-    final_result_list = []
+
+    final_result_list = list_dict_duplicate_removal(second_result_list)
     # 在这里将结果利用simhash去重
-    final_result_list.extend(simhash_remove_similar(second_result_list))
+    # final_result_list.extend(simhash_remove_similar(second_result_list))
     print('通过用户画像返回的新闻列表长度:{0}'.format(len(final_result_list)))
     if len(final_result_list) < MAX_NEWS_NUMBER:
         get_enough_news(final_result_list, mymodels)
 
     final_result_list = sorted(final_result_list, key=itemgetter('priority', 'news_time'), reverse=True)
 
-    print('补充数据返回的新闻列表长度:{0}'.format(len(final_result_list)))
+    print('补充数据返回的新闻列表长度:{0}'.format(len(final_result_list) - len(final_result_list)))
     return final_result_list
+
+
+def list_dict_duplicate_removal(data_list):
+    run_function = lambda x, y: x if y in x else x + [y]
+    return reduce(run_function, [[], ] + data_list)
 
 
 # simhash算法去重
