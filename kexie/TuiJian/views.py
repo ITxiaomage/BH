@@ -354,7 +354,7 @@ def get_dfkx_news_list(department):
 
     # 补充新闻数量
     if len(result_list) < MAX_NEWS_NUMBER:
-        get_enough_news(result_list, QGXH)
+        get_enough_news(result_list, DFKX)
         return result_list
     else:
         return result_list[:MAX_NEWS_NUMBER]
