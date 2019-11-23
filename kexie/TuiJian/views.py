@@ -317,15 +317,17 @@ def get_kx_leaders_from_mysql():
 def get_qgxh_news_list(department):
     qgxh_dep_numben_list = num_xuehui()
     result_list = []
-    # 找到用户兼职的所有全国学会单位，并根据这些单位去检索新闻。
-    for one_dep in department:
-        one_dep = str(one_dep)
-        if one_dep in qgxh_dep_numben_list:
-            source = accord_number_get_department(one_dep)
-            result_list.extend(search_data_from_mysql(QGXH, source=AgencyQgxh.objects.filter(department=source)[0]))
-    # 如果result_list为空，说明用户没有在全国学会兼职，那么返回数据库最新的新闻
-    if not result_list:
-        return sorted(search_data_from_mysql(QGXH), key=itemgetter('priority', 'news_time'), reverse=True)
+    #department不为空
+    if department :
+        # 找到用户兼职的所有全国学会单位，并根据这些单位去检索新闻。
+        for one_dep in department:
+            one_dep = str(one_dep)
+            if one_dep in qgxh_dep_numben_list:
+                source = accord_number_get_department(one_dep)
+                result_list.extend(search_data_from_mysql(QGXH, source=AgencyQgxh.objects.filter(department=source)[0]))
+        # 如果result_list为空，说明用户没有在全国学会兼职，那么返回数据库最新的新闻
+        if not result_list:
+            return sorted(search_data_from_mysql(QGXH), key=itemgetter('priority', 'news_time'), reverse=True)
     # 新闻数量不够就一直补充
     if len(result_list) < MAX_NEWS_NUMBER:
         get_enough_news(result_list, QGXH)
@@ -338,15 +340,17 @@ def get_qgxh_news_list(department):
 def get_dfkx_news_list(department):
     dfkx_dep_numben_list = num_dfkx()
     result_list = []
-    # 找到用户兼职的所有地方科协单位，并根据这些单位去检索新闻。
-    for one_dep in department:
-        one_dep = str(one_dep)
-        if one_dep in dfkx_dep_numben_list:
-            source = accord_number_get_department(one_dep)
-            result_list.extend(search_data_from_mysql(DFKX, source=AgencyDfkx.objects.filter(department=source)[0]))
-    # 如果result_list为空，说明用户没有在地方科协兼职，那么返回数据库最新的新闻
-    if not result_list:
-        return sorted(search_data_from_mysql(DFKX), key=itemgetter('priority', 'news_time'), reverse=True)
+    #不能为空
+    if department:
+        # 找到用户兼职的所有地方科协单位，并根据这些单位去检索新闻。
+        for one_dep in department:
+            one_dep = str(one_dep)
+            if one_dep in dfkx_dep_numben_list:
+                source = accord_number_get_department(one_dep)
+                result_list.extend(search_data_from_mysql(DFKX, source=AgencyDfkx.objects.filter(department=source)[0]))
+        # 如果result_list为空，说明用户没有在地方科协兼职，那么返回数据库最新的新闻
+        if not result_list:
+            return sorted(search_data_from_mysql(DFKX), key=itemgetter('priority', 'news_time'), reverse=True)
 
     # 补充新闻数量
     if len(result_list) < MAX_NEWS_NUMBER:
@@ -559,12 +563,17 @@ def get_china_top_news(request):
 ####################################新闻id返回新闻 内容，并记录用户画像###########################################
 # 根据新闻id返回内容,并记录用户画像
 def news_content(request):
-    news_id = request.GET.get('news_id')
+    #没有新闻id直接返回
+    try:
+        news_id = request.GET.get('news_id')
+    except:
+        return HttpResponse(json.dumps([], ensure_ascii=False))
     try:
         user_id = request.GET.get('user_id')
     except Exception as err:
         user_id = None
-        print(err)
+
+        #print(err)
     # 根据新闻id获取到新闻的详情
     news_info_dict = accord_news_id_get_content_list(news_id)
     if not news_info_dict:
@@ -593,6 +602,8 @@ def news_content(request):
 # 根据新闻id,获取当前新闻的信息
 def accord_news_id_get_content_list(news_id):
     db_table, number = CommonMethod.get_table_and_id(news_id)
+    if not db_table:
+        return {}
     # 根据db_table获取到models
     mymodels = CommonMethod.table_to_models(db_table)
     # 查到数据
@@ -641,24 +652,26 @@ def update_kxyj_data():
     try:
         news_list = spider.get_kxyj_news()
     except Exception as err:
-        print('科协一家新闻资讯')
+        #print('科协一家新闻资讯')
         news_list = []
-        print(err)
+        #print(err)
     # 专家观点
     try:
         news_list.extend(spider.get_kxyj_exp_opi())
     except Exception as err:
-        print('专家观点出错')
-        print(err)
+        pass
+        # print('专家观点出错')
+        # print(err)
 
     if news_list:
         for one_news in news_list:
             news = TECH(**one_news)
             try:
                 news.save()
-                print('Successful')
+                #print('Successful')
             except Exception as err:
-                print(err)
+                # print(err)
+                pass
 
 
 #######################置顶的时政新闻入库###################
@@ -668,17 +681,18 @@ def update_china_top_news():
         data = spider.china_top_news()
         china_top_news = ChinaTopNews(**data)
     except Exception as err:
-        print('获取置顶的时政新闻失败')
+        #print('获取置顶的时政新闻失败')
         china_top_news = None
-        print(err)
+        #print(err)
     # 置顶时政新闻入库
     if china_top_news:
         try:
             china_top_news.save()
-            print('Successful')
+            #print('Successful')
         except Exception as err:
-            print('插入置顶的时政新闻失败')
-            print(err)
+            pass
+            # print('插入置顶的时政新闻失败')
+            # print(err)
 
 
 ####################################科协官网数据入库###################
@@ -686,22 +700,24 @@ def update_kexie_news_into_mysql():
     try:
         news_list = spider.update_kexie_news()
     except Exception as err:
-        print('selenium获取科协官网失败')
-        print(err)
+        #print('selenium获取科协官网失败')
+        #print(err)
         try:
             news_list = spider.get_kexie_news_data_list()
         except Exception as err:
-            print('bs4获取科协官网失败')
+            pass
+            #print('bs4获取科协官网失败')
             news_list = []
-            print(err)
+            #print(err)
     if news_list:
         for one_news in news_list:
             kx = KX(**one_news)
             try:
                 kx.save()
-                print('Successful')
+                #print('Successful')
             except Exception as e:
-                print(e)
+                pass
+                #print(e)
     # return HttpResponse('成功')
 
 
@@ -710,17 +726,18 @@ def updata_get_rmw_news_data():
     try:
         news_list = spider.get_rmw_news_data()
     except Exception as err:
-        print('人民网时政数据错误')
+        #print('人民网时政数据错误')
         news_list = None
-        print(err)
+        #print(err)
     if news_list:
         for one_news in news_list:
             news = News(**one_news)
             try:
                 news.save()
-                print('Successful')
+                #print('Successful')
             except Exception as e:
-                print(e)
+                pass
+                #print(e)
     # return HttpResponse('人民网时政新闻入库成功')
     # return render(request,'news.html',{'news_list':news_list})
 
@@ -730,17 +747,18 @@ def update_get_rmw_kj_data():
     try:
         news_list = spider.get_rmw_kj_data()
     except Exception as err:
-        print('人民网科技数据错误')
+        #print('人民网科技数据错误')
         news_list = None
-        print(err)
+        #print(err)
     if news_list:
         for one_news in news_list:
             news = TECH(**one_news)
             try:
                 news.save()
-                print('Successful')
+                #print('Successful')
             except Exception as e:
-                print(e)
+                pass
+                #print(e)
     # return HttpResponse('人民网科技数据入库成功')
 
 
@@ -749,8 +767,9 @@ def hanle_cast_into_mysql():
     try:
         handle_cast.start()
     except Exception as err:
-        print('清洗cast数据库入库出错')
-        print(err)
+        pass
+        #print('清洗cast数据库入库出错')
+        #print(err)
     # try:
     #     handle_cast.sz_kj()
     # except Exception as e:

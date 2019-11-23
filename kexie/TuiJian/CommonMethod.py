@@ -40,7 +40,10 @@ def table_to_models(db_table):
     return mymodels
 # 根据新闻id获取到数据表和在表中的id
 def get_table_and_id(news_id):
-    index = news_id.rindex('_')
-    db_table = news_id[:index]
-    number = int(news_id[index + 1:])
+    try:
+        index = news_id.rindex('_')
+        db_table = news_id[:index]
+        number = int(news_id[index + 1:])
+    except:
+        return None, None
     return db_table, number

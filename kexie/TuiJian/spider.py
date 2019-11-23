@@ -247,34 +247,34 @@ def update_kexie_news():
             result_list.extend(get_kx_data(browser, tt_url, base_url, 1))
         except Exception as err:
             print('头条新闻出错')
-            print(err)
+            #print(err)
         try:
             # 要闻
             result_list.extend(get_kx_data(browser, yw_url, base_url, 1))
         except Exception as err:
             print('要闻出错')
-            print(err)
+            #print(err)
         try:
             # 通知
             result_list.extend(get_kx_data(browser, tzgc_url, base_url, 3))
         except Exception as err:
             print('通知出错')
-            print(err)
+            #print(err)
             pass
 
         try:
             result_list.extend(get_kx_video_data(browser, xhfc_url, base_url, 4))
         except Exception as err:
             print('协会风采出错')
-            print(err)
+            #print(err)
         try:
             result_list.extend(get_kx_video_data(browser, cmkx_url, base_url, 4))
         except Exception as err:
             print('传媒风采')
-            print(err)
+            #print(err)
     except Exception as err:
         print('爬取科协新闻出错')
-        print(err)
+        #print(err)
     finally:
         browser.quit()
         return result_list
@@ -319,7 +319,7 @@ def get_video_content(browser, url, xpath):
 
 # 科协视频
 def get_kx_video_data(browser, url, base_url, label):
-    print('进入官网。。。')
+    #print('进入官网。。。')
     try:
         # 进入科协官网新闻
         browser.get(url)
@@ -329,7 +329,7 @@ def get_kx_video_data(browser, url, base_url, label):
         info_list_len = len(info_list) + 1
     except:
         info_list_len = 0
-        print('进入科协官网出错。。。')
+        #print('进入科协官网出错。。。')
 
     # 存放结果的列表
     temp_list = []
@@ -358,7 +358,7 @@ def get_kx_video_data(browser, url, base_url, label):
 
 # 科协数据
 def get_kx_data(browser, url, base_url, label):
-    print('进入{0}'.format(label))
+    #print('进入{0}'.format(label))
     try:
         # 进入科协官网新闻
         browser.get(url)
@@ -369,7 +369,7 @@ def get_kx_data(browser, url, base_url, label):
         print(info_list_len)
     except:
         info_list_len = 0
-        print('进入科协官网出错。。。')
+        #print('进入科协官网出错。。。')
 
     # 存放结果的列表
     temp_list = []
@@ -391,8 +391,9 @@ def get_kx_data(browser, url, base_url, label):
             try:
                 del content['style']
             except  Exception as err:
-                print('取出科协官网style错误')
-                print(err)
+                pass
+                #print('取出科协官网style错误')
+                #print(err)
             imgs = content.findAll('img')
             img_path = deal_imgs_and_a(base_url, content=content, imgs=imgs)
             content = str(content).replace("style", ' ')
@@ -424,7 +425,7 @@ def spider_head(url):
         html = response.text.encode(response.encoding).decode()
         soup = BeautifulSoup(html, 'lxml')
     except Exception as err:
-        print('spider_head出错')
+        #print('spider_head出错')
         soup = None
     return soup
 
@@ -458,15 +459,15 @@ def get_content_time_img(news_url, base_url):
         try:
             a_hrefs = content.findAll('a')
         except Exception as err:
-            print('文章中没有a链接')
+            #print('文章中没有a链接')
             a_hrefs = None
         if a_hrefs:
             for a_href in a_hrefs:
                 try:
                     old_href = a_href['href']
                 except Exception as err:
-                    print('a标签没有href属性')
-                    print(err)
+                    #print('a标签没有href属性')
+                    #print(err)
                     continue
                 if old_href[0] == '/':
                     new_href = base_url + old_href
@@ -505,15 +506,15 @@ def deal_imgs_and_a(base_url, content=None, imgs=None):
     try:
         a_hrefs = content.findAll('a')
     except Exception as err:
-        print('文章中没有a链接')
+        #print('文章中没有a链接')
         a_hrefs = None
     if a_hrefs:
         for a_href in a_hrefs:
             try:
                 old_href = a_href['href']
             except Exception as err:
-                print('a标签没有href属性')
-                print(err)
+                #print('a标签没有href属性')
+                #print(err)
                 continue
             if old_href[0] == '/':
                 new_href = base_url + old_href
@@ -543,7 +544,7 @@ def china_top_news():
         news_time = time.strftime('%Y-%m-%d')
     except Exception as err:
         news_title = None
-        print(err)
+        #print(err)
 
     try:
         r = requests.get(url=news_url, headers=headers)
@@ -552,19 +553,20 @@ def china_top_news():
         try:
             content = soup.select('.main')[0]
         except Exception as err:
-            print('第一次失败')
-            print(err)
+            #print('第一次失败')
+            #print(err)
             try:
                 content = soup.select('.articleBody')[0]
             except Exception as err:
-                print('第二次获取失败')
-                print(err)
+                #print('第二次获取失败')
+                #print(err)
                 try:
                     content = soup.select('.artiContent')[0]
                     img_list.append(IMG)
                 except Exception as err:
-                    print('第三次获取失败')
-                    print(err)
+                    pass
+                    #print('第三次获取失败')
+                    #print(err)
 
         try:
             # 去除文章中的注释
