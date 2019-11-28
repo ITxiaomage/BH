@@ -237,7 +237,15 @@ def update_kexie_news():
         # 新闻
         tt_url = r'http://www.cast.org.cn/col/col79/index.html'
         yw_url = r'http://www.cast.org.cn/col/col80/index.html'
+        #通知 学术学会 科学普及
         tzgc_url = r'http://www.cast.org.cn/col/col457/index.html'
+        tzxsxh = r'http://www.cast.org.cn/col/col458/index.html'
+        tzkxpj = r'http://www.cast.org.cn/col/col459/index.html'
+        zzpj = r'http://www.cast.org.cn/col/col460/index.html'
+        kxdj = r'http://www.cast.org.cn/col/col461/index.html'
+        jhcw = r'http://www.cast.org.cn/col/col462/index.html'
+        dyxc = r'http://www.cast.org.cn/col/col463/index.html'
+        dwjl = r'http://www.cast.org.cn/col/col464/index.html'
         # 视频
         xhfc_url = r'http://www.cast.org.cn/col/col106/index.html'
         cmkx_url = r'http://www.cast.org.cn/col/col107/index.html'
@@ -257,6 +265,59 @@ def update_kexie_news():
         try:
             # 通知
             result_list.extend(get_kx_data(browser, tzgc_url, base_url, 3))
+        except Exception as err:
+            print('通知出错')
+            #print(err)
+            pass
+        try:
+            # 学术学会
+            result_list.extend(get_kx_data(browser, tzxsxh, base_url, 3))
+        except Exception as err:
+            print('通知出错')
+            #print(err)
+            pass
+        try:
+            # 科学普及
+            result_list.extend(get_kx_data(browser, tzkxpj, base_url, 3))
+        except Exception as err:
+            print('通知出错')
+            #print(err)
+            pass
+        try:
+            # 组织普及
+            result_list.extend(get_kx_data(browser, zzpj, base_url, 3))
+        except Exception as err:
+            print('通知出错')
+            #print(err)
+            pass
+
+        try:
+            # 科协党建
+            result_list.extend(get_kx_data(browser, kxdj, base_url, 3))
+        except Exception as err:
+            print('通知出错')
+            #print(err)
+            pass
+
+        try:
+            # 计划财务
+            result_list.extend(get_kx_data(browser, jhcw, base_url, 3))
+        except Exception as err:
+            print('通知出错')
+            #print(err)
+            pass
+
+        try:
+            # 调研选春dwjl
+            result_list.extend(get_kx_data(browser, dyxc, base_url, 3))
+        except Exception as err:
+            print('通知出错')
+            #print(err)
+            pass
+
+        try:
+            # 对外交流
+            result_list.extend(get_kx_data(browser, dwjl, base_url, 3))
         except Exception as err:
             print('通知出错')
             #print(err)
@@ -627,7 +688,8 @@ def TF_IDF(content, n=MAX_KEYWORDS):
 
 
 ####################################将新闻相关信息打包为一个字典#############################################################
-def package_data_dict(title=None, url=None, img=None, content=None, date=None, source=None, label=None):
+#tag = 1 代表的是地方科协，tag =2 代表的是全国学会
+def package_data_dict(title=None, url=None, img=None, content=None, date=None, source=None, label=None , tag =None):
     temp_dict = {}
     if label == 4:  # 视频就是以标题作为关键字
         keywords = TF_IDF(title, MAX_KEYWORDS)
@@ -648,5 +710,19 @@ def package_data_dict(title=None, url=None, img=None, content=None, date=None, s
     temp_dict['author'] = ''
     temp_dict['label'] = label
     temp_dict['keywords'] = ' '.join(keywords)
+    if tag == 1:
+        try:
+            source = AgencyDfkx.objects.filter(department=source)[0]
+        except Exception as err:
+            print(err)
+            source = None
+            # print('地方科协来源错误')
+    if tag == 2:
+        try:
+            source = AgencyQgxh.objects.filter(department=source)[0]
+        except Exception as err:
+            print(err)
+            source = None
+            # print('全国学会来源错误')
     temp_dict['source'] = source
     return temp_dict

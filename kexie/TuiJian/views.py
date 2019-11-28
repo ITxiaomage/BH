@@ -11,7 +11,7 @@ from operator import itemgetter
 import json
 from simhash import Simhash
 from django.db.models import Q
-from . import CommonMethod
+from . import CommonMethod,dfkxSpider
 from functools import reduce
 ####################################定时任务#########################
 from apscheduler.scheduler import Scheduler
@@ -39,11 +39,12 @@ def mytask_1():
 
 
 #  每天更新一次
-@sched_2.interval_schedule(days=1)
+@sched_2.interval_schedule(hours=12)
 def mytask__2():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # cast数据库
-    hanle_cast_into_mysql()
+    #hanle_cast_into_mysql()
+    dfkxSpider.start_dfkx_spider()
     print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
 
 
