@@ -50,6 +50,7 @@ class NewOrgBaseClass(object):
     ordering = ('id',)
     # 可编辑
     list_editable = ['short']
+    readonly_fields = ("department", 'number')
 
 
 class NewNewsBaseClass(object):
