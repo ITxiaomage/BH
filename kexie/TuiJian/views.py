@@ -39,11 +39,11 @@ def mytask_1():
 
 
 #  每天更新一次
-@sched_2.interval_schedule(hours=12)
+@sched_2.interval_schedule(hours=24)
 def mytask__2():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # cast数据库
-    #hanle_cast_into_mysql()
+    hanle_cast_into_mysql()
     dfkxSpider.start_dfkx_spider()
     print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
 
@@ -67,14 +67,14 @@ def get_user_news_list(request):
     except Exception as err:
         channel = ChannelToDatabase.objects.all().values_list('channel')[0][0]
         print("获取频道出现错误，因此设为默认值:{0}".format(channel))
-        print(err)
+        #print(err)
 
     try:
         flag = request.GET.get('flag')
     except Exception as err:
         flag = 0
-        print('获取num错误')
-        print(err)
+        #print('获取num错误')
+        #print(err)
 
     # 获取用户id
     try:
@@ -82,7 +82,7 @@ def get_user_news_list(request):
     except Exception as err:
         print("获取用户id出现错误")
         user_id = None
-        print(err)
+        #print(err)
     # 临时修改为默认用户
     if not user_id:
         user_id = '999'
