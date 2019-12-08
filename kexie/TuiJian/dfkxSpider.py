@@ -202,6 +202,9 @@ def get_ankx_news(label, url, base_url=r'http://www.ahpst.net.cn/ahpst/web/'):
         ssoup = get_text(news_url)
         news_zoom = ssoup.find_all("div", class_="article")[0]
         news_img = complete_img_a(base_url, news_zoom)
+        if news_img == "http://www.ahpst.net.cn/ahpst/web/images/bt_2.gif":
+            news_img = None
+        if not news_img: news_img = None
         news_content = str(news_zoom)
         #dict = dict_list(news_title, news_url, news_img, news_content, news_time, news_label)
         temp_list.append(
@@ -347,7 +350,7 @@ def get_gdkx_news(label, url, base_url=r'http://gdsta.cn'):
         news_time = str(one_news.select("li>span")[0].text)
         news_label = str(label)
         ssoup = get_text(news_url)
-        news_title = str(ssoup.find_all("div", class_="content_title")[0])
+        news_title = str(ssoup.find_all("div", class_="content_title")[0].text)
         news_zoom = ssoup.find_all("div", id="articleContnet")[0]
         news_img = complete_img_a(base_url, news_zoom)
         news_content = str(news_zoom)
@@ -367,17 +370,17 @@ def get_gdkx_newss(label, url, base_url=r'http://gdsta.cn'):
     soup = get_text(url)
     news_list = soup.find_all("div", class_="article_list_ld")[0].select("ul>li")
     for one_news in news_list:
-        news_title = str(one_news.select(".list_title")[0].select("div>a")[0]["title"])
-        print(news_title)
+        news_title = str(one_news.select(".list_title")[0].select("div>a")[0].text)
+        #print(news_title)
         news_url = one_news.select(".list_title")[0].select("div>a")[0]["href"]
         # news_url = one_news.select("li>a")[0]["href"]
         news_url = base_url + news_url
-        print(news_url)
+        #print(news_url)
         news_time = str(one_news.select(".ld_tag_l")[0].text)
         news_time = str(news_time.replace("\r", "").replace("\n", "").replace(" ", ""))
-        print(news_time)
+        #print(news_time)
         news_label = label
-        print(news_label)
+        #print(news_label)
         ssoup = get_text(news_url)
         if (ssoup.find_all("div", class_="c_content_overflow")):
             news_zoom = ssoup.find_all("div", class_="c_content_overflow")[0]
@@ -385,7 +388,7 @@ def get_gdkx_newss(label, url, base_url=r'http://gdsta.cn'):
             news_zoom = ssoup.find_all("div", id="articleContnet")[0]
         news_img = complete_img_a(base_url, news_zoom)
         if not news_img: news_img = None
-        print(news_img)
+        #print(news_img)
         news_content = str(news_zoom)
         # print(news_content)
         #dict = dict_list(news_title, news_url, news_img, news_content, news_time, news_label)
@@ -2341,9 +2344,10 @@ def spider_data_into_mysql(news_list):
             news = DFKX(**one_news)
             try:
                 news.save()
-                print('Successful')
+                #print('Successful')
             except Exception as e:
-                print(e)
+                pass
+                #print(e)
 
 
 def start_dfkx_spider():
