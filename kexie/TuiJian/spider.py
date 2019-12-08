@@ -458,10 +458,13 @@ def get_kx_data(browser, url, base_url, label):
             imgs = content.findAll('img')
             img_path = deal_imgs_and_a(base_url, content=content, imgs=imgs)
             content = str(content).replace("style", ' ')
+            #通知一栏不需要图片
+            if label == 3:
+                img_path = None
             temp_list.append(
                 package_data_dict(title=title, url=news_url, img=img_path, content=str(content), date=news_time,
                                   source="中国科协", label=label))
-            print(title)
+            #print(title)
     return temp_list
 
 
@@ -671,7 +674,7 @@ def china_top_news():
     content = re.sub(r"[（](.*?)[）]", '', str(content))
 
     return package_data_dict(title=news_title, url=news_url, img=img_list[0], content=content, date=news_time,
-                             source='中国网新闻中心')
+                             source='中国网-新闻中心')
 
 
 ####################################新闻TF_IDF的提取#############################################################
