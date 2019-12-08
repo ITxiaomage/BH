@@ -80,8 +80,8 @@ def start():
         save_data_to_mysql(data,QGXH)
 
     #在处理地方科协的数据
-        data = handle_website_shenghui(shenghui(),cast_table,cast_cursor)
-        save_data_to_mysql(data,DFKX)
+        # data = handle_website_shenghui(shenghui(),cast_table,cast_cursor)
+        # save_data_to_mysql(data,DFKX)
 
     # #处理科协
     # media = ["创新战略研究院", "中国科普研究所", "农村专业技术服务中心", "青少年科技中心", "企业创新服务中心"]
@@ -98,8 +98,8 @@ def start():
         save_data_to_mysql(data, QGXH)
 
     # 在处理地方科协的数据
-        data = handle_wechat_shenghui(shenghui(), cast_table, cast_cursor)
-        save_data_to_mysql(data,DFKX)
+    #     data = handle_wechat_shenghui(shenghui(), cast_table, cast_cursor)
+    #     save_data_to_mysql(data,DFKX)
 
     # # 处理科协
     # kx = [
