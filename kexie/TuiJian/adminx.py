@@ -109,7 +109,7 @@ class NewNewsBaseClass(object):
         )
     )
     readonly_fields = ('comment', 'like', 'keywords')
-    exclude = ['url']
+    #exclude = ['url']
 
 class KXAdmin(NewNewsBaseClass):
     pass
