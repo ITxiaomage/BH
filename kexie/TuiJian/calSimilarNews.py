@@ -41,7 +41,7 @@ def similar_news(news_id):
             temp_dict['news_id'] = str(mymodels._meta.db_table) + '_' + str(one_news[0])
             temp_dict['news_time'] = str(one_news[1])
             temp_dict['news_source'] = CommonMethod.get_short_source(mymodels, one_news[2])
-            temp_dict['news_img'] = one_news[3]
+            temp_dict['news_img'] = CommonMethod.get_correct_img(one_news[3])
             temp_dict['news_score'] = simile_score
             temp_list.append(temp_dict)
     # 只要有相似新闻就返回，但是数量不超过五条
