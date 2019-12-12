@@ -16,7 +16,7 @@ from .models import *
 
 from .define import *
 
-img_list = []
+
 
 
 #################################科协一家提供的新闻资讯和专家观点#####################################
@@ -410,7 +410,7 @@ def get_kx_video_data(browser, url, base_url, label):
                 del content['height']
             except:
                 pass
-            print(title)
+            #print(title)
             temp_list.append(
                 package_data_dict(title=title, url=news_url, img=img, content=str(content), date=video_time,
                                   source="中国科协", label=label))
@@ -427,8 +427,9 @@ def get_kx_data(browser, url, base_url, label):
         # 获取列表
         info_list = browser.find_elements_by_xpath('//div[@class="bt-mod-wzpb-02"]/ul/li')
         info_list_len = len(info_list) + 1
-        print(info_list_len)
-    except:
+        #print(info_list_len)
+    except Exception as err:
+        print(err)
         info_list_len = 0
         #print('进入科协官网出错。。。')
 
@@ -591,6 +592,7 @@ def deal_imgs_and_a(base_url, content=None, imgs=None):
 #########################3###########爬取每天的置顶时政新闻，来自与中国网#############################################################
 def china_top_news():
     result_dict = {}
+
     url = r'http://www.china.com.cn/'
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50"}
@@ -608,25 +610,28 @@ def china_top_news():
         news_time = time.strftime('%Y-%m-%d')
     except Exception as err:
         news_title = None
+        news_url = None
+        news_time = datetime.date.today()
         #print(err)
-
+    #没有url就不爬了
+    if not news_url:
+        return result_dict
     try:
         r = requests.get(url=news_url, headers=headers)
         html = r.text.encode(r.encoding).decode()
         soup = BeautifulSoup(html, 'lxml')
         try:
-            content = soup.select('.main')[0]
+            content = soup.select('.articleBody')[0]
         except Exception as err:
             #print('第一次失败')
             #print(err)
             try:
-                content = soup.select('.articleBody')[0]
+                content = soup.select('.main')[0]
             except Exception as err:
                 #print('第二次获取失败')
                 #print(err)
                 try:
                     content = soup.select('.artiContent')[0]
-                    img_list.append(IMG)
                 except Exception as err:
                     pass
                     #print('第三次获取失败')
@@ -635,8 +640,9 @@ def china_top_news():
         try:
             # 去除文章中的注释
             comments = soup.findAll(text=lambda text: isinstance(text, Comment))
-            for comment in comments:
-                comment.extract()
+            if comments:
+                for comment in comments:
+                    comment.extract()
             try:
                 # 把新闻的开始的视频处理了
                 content.select("#videoarea")[0].extract()
@@ -653,27 +659,21 @@ def china_top_news():
             except:
                 pass
         except Exception as err:
-            print(err)
+            pass
+            #print(err)
     except Exception as err:
         print(err)
 
-        # 图片
-    imgs = content.findAll("img")
-    if not img_list:
-        for one in imgs:
-            img = one.attrs['src']
-            if img.split('/')[-1] == '161021-02.jpg' or img.split('/')[-1] == '161021-03.jpg' or img.split('/')[
-                -1] == 'logo.gif':
-                continue
-            else:
-                img_list.append(img)
-        if not img_list:
-            img_list.append(IMG)
-
     # 把文章中记者的信息处理了
     content = re.sub(r"[（](.*?)[）]", '', str(content))
+    # 图片
+    imgs = content.findAll("img")
+    if imgs:
+        img = imgs[0]
+    else:
+        img = IMG
 
-    return package_data_dict(title=news_title, url=news_url, img=img_list[0], content=content, date=news_time,
+    return package_data_dict(title=news_title, url=news_url, img=img, content=content, date=news_time,
                              source='中国网-新闻中心')
 
 
