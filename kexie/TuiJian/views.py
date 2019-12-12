@@ -432,7 +432,8 @@ def search_kx_data_from_mysql(flag=0):
     else:
         temp_list = search_data_from_mysql(myModel=KX, n=MAX_NEWS_NUMBER, label=4)
     result_dict['video'] = temp_list
-    # 按照时间检索找五张img字段不为空的数据,用于轮播图 3
+    # 按照时间检索找五张img字段不为空的数据,用于轮播图
+
     result_dict['banners'] = search_data_from_mysql(myModel=KX, n=LIMIT_NEWS, LB=True)
     return result_dict
 
@@ -536,7 +537,8 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
             news_id = str(myModel._meta.db_table) + '_' + str(one[0])
             temp_dict['news_id'] = news_id
             temp_dict['news_title'] = one[1]
-            temp_dict['news_img'] = one[2]
+            #在这里要进行img
+            temp_dict['news_img'] = CommonMethod.get_correct_img(one[2])
             temp_dict['news_time'] = str(one[3])
             # 新闻来源要特殊处理一下，展示给用户的是新闻简称
             temp_dict['news_source'] = CommonMethod.get_short_source(myModel, one[4])
