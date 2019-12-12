@@ -1,5 +1,23 @@
 from .models import *
 
+import base64
+import requests
+from io import BytesIO
+
+# 图片转base64
+def image_to_base64(url):
+    response = requests.get(url)
+    result =base64.b64encode(BytesIO(response.content).read())
+    return 'data:image/jpeg;base64,' + str(result, encoding="utf-8")
+
+
+
+def get_correct_img(img):
+    img  = str(img)
+    if  img.startswith('http'):
+        return img
+    else:
+        return image_to_base64('http://192.168.171.34:8102/media' + img)
 
 # 拿到source
 def get_short_source(myModel, source):
