@@ -1,13 +1,19 @@
 
 #默认的中央领导人照片
-IMG = 'http://www.gov.cn/xinwen/site1/20140905/18037327d8e41573fa3901.jpg'
+#IMG = 'http://www.gov.cn/xinwen/site1/20140905/18037327d8e41573fa3901.jpg'
+IMG = 'mgh/18037327d8e41573fa3901_djL0Bhv_9Z4ln0T_jYHLGik.jpg'
 
 #训练好的词向量模型路径
 #w2v_path_model ='E:\推荐相关\model/w2v.model'
 w2v_path_model ='/home/BH_TuiJian/kexie/w2v.model'
 #存放科协机构的文件路径
 #jiggou_path = r'E:\推荐相关\机构.xls'
-jiggou_path = r'/home/BH_TuiJian/kexie/机构.xls'
+#jiggou_path = r'/home/BH_TuiJian/kexie/机构.xls'
+
+#服务器地址
+IMG_ROOT = 'http://127.0.0.1:8102/media/'
+#本地测试地址
+LOC_IMG_ROOT = 'http://127.0.0.1:8000/media/'
 
 #每篇文章提取的关键字最大数，用户设置用户画像
 MAX_KEYWORDS = 10
