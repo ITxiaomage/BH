@@ -13,6 +13,8 @@ from simhash import Simhash
 from django.db.models import Q
 from . import CommonMethod,dfkxSpider
 from functools import reduce
+
+
 ####################################定时任务#########################
 from apscheduler.scheduler import Scheduler
 
@@ -21,7 +23,7 @@ sched_2 = Scheduler()  # 实例化，固定格式
 
 
 #  五个小时更新一次
-@sched_1.interval_schedule(hours=5)
+@sched_1.interval_schedule(hours=12)
 def mytask_1():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # 科协一家
@@ -42,7 +44,7 @@ def mytask_1():
 @sched_2.interval_schedule(hours=24)
 def mytask__2():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
-    # cast数据库
+    # # cast数据库
     hanle_cast_into_mysql()
     dfkxSpider.start_dfkx_spider()
     print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
@@ -53,8 +55,9 @@ sched_2.start()  # 启动该脚本
 
 
 def example(request):
-    hanle_cast_into_mysql()
-    return HttpResponse('999999999999999')
+    news_list = dfkxSpider.get_hunankx()
+    context = {"news_list":news_list}
+    return render(request,'news.html', context)
 
 
 #########################根据用户id、department和用户记录返回新闻列表###############
@@ -552,7 +555,7 @@ def get_china_top_news(request):
         chinaTopNews = ChinaTopNews.objects.all().order_by('-time')[0]
         result_dict['news_title'] = chinaTopNews.title
         result_dict['news_time'] = str(chinaTopNews.time)
-        result_dict['news_img'] = str(chinaTopNews.img)
+        result_dict['news_img'] = CommonMethod.get_correct_img(chinaTopNews.img)
         result_dict['news_source'] = chinaTopNews.source
         result_dict['news_id'] = str(ChinaTopNews._meta.db_table) + '_' + str(chinaTopNews.id)
     except Exception as err:
