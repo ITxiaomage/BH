@@ -1,4 +1,5 @@
 from .models import *
+from . import define
 
 import base64
 import requests
@@ -12,12 +13,16 @@ def image_to_base64(url):
 
 
 
+
 def get_correct_img(img):
+    if not img :
+        return None
     img  = str(img)
     if  img.startswith('http'):
         return img
     else:
-        return image_to_base64('http://127.0.0.1:8102/media/' + img)
+        #return image_to_base64(define.LOC_IMG_ROOT + img)
+        return image_to_base64(define.IMG_ROOT + img)
 
 # 拿到source
 def get_short_source(myModel, source):
