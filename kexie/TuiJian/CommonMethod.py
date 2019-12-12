@@ -17,7 +17,7 @@ def get_correct_img(img):
     if  img.startswith('http'):
         return img
     else:
-        return image_to_base64('http://192.168.171.34:8102/media/' + img)
+        return image_to_base64('http://127.0.0.1:8102/media/' + img)
 
 # 拿到source
 def get_short_source(myModel, source):
