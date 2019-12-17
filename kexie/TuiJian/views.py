@@ -560,7 +560,7 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
     elif LB:  # 找轮播图
         try:
-            data = myModel.objects.filter(~Q(img=None)).filter(~Q(img='')).values_list('id', 'title', 'img', 'time',
+            data = myModel.objects.exclude(id__in=id__list).filter(~Q(img=None)).filter(~Q(img='')).values_list('id', 'title', 'img', 'time',
                                                                                   'source', 'comment', 'like',
                                                                                   'priority', 'label').order_by(
                 '-time')[:n]
