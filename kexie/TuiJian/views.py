@@ -55,7 +55,8 @@ sched_2.start()  # 启动该脚本
 
 
 def example(request):
-    news_list = dfkxSpider.get_hunankx()
+    news_list = []
+    news_list.append(spider.china_top_news())
     context = {"news_list":news_list}
     return render(request,'news.html', context)
 
@@ -343,7 +344,11 @@ def get_qgxh_news_list(department):
 # 地方科协频道推荐算法
 def get_dfkx_news_list(department):
     dfkx_dep_numben_list = num_dfkx()
-    result_list = []
+    result_dict = {}
+    label_one =[]
+    label_two = []
+    label_three = []
+    lb_news = []
     #不能为空
     if department:
         # 找到用户兼职的所有地方科协单位，并根据这些单位去检索新闻。
@@ -351,18 +356,71 @@ def get_dfkx_news_list(department):
             one_dep = str(one_dep)
             if one_dep in dfkx_dep_numben_list:
                 source = accord_number_get_department(one_dep)
-                result_list.extend(search_data_from_mysql(DFKX, source=AgencyDfkx.objects.filter(department=source)[0]))
-        # 如果result_list为空，说明用户没有在地方科协兼职，那么返回数据库最新的新闻
-        if not result_list:
-            return sorted(search_data_from_mysql(DFKX), key=itemgetter('priority', 'news_time'), reverse=True)
+                # 每个部门都需要检索标签为1.2.3的新闻资讯
+                label_one.extend(search_data_from_mysql(myModel=DFKX, n = LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0], label=1))
+                label_two.extend(search_data_from_mysql(myModel=DFKX, n = LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0],label=2))
+                label_three.extend(search_data_from_mysql(myModel=DFKX, n =LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0],label=3))
 
-    # 补充新闻数量
-    if len(result_list) < MAX_NEWS_NUMBER:
-        get_enough_news(result_list, DFKX)
-        return result_list
-    else:
-        return result_list[:MAX_NEWS_NUMBER]
+    # 如果长度不够就补充新闻，要不然最多返回三个
+    if len(label_one) < LIMIT_NEWS:
+        id_list =[]
+        id_list.extend(get_news_id(label_one))
+        label_one.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list,n =LIMIT_NEWS,label=1))
 
+    if len(label_two) < LIMIT_NEWS:
+        id_list =[]
+        id_list.extend(get_news_id(label_two))
+        label_two.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list, n=LIMIT_NEWS, label=2))
+
+    if len(label_three) < LIMIT_NEWS:
+        id_list =[]
+        id_list.extend(get_news_id(label_three))
+        label_three.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list, n=LIMIT_NEWS, label=3))
+
+    # 找轮播图,把已经出现的新闻过滤掉
+    id_list = []
+    id_list.extend(get_news_id(label_one))
+    id_list.extend(get_news_id(label_two))
+    id_list.extend(get_news_id(label_three))
+    lb_news.extend(search_data_from_mysql(myModel=DFKX, n=LIMIT_NEWS,id__list=id_list,LB=True))
+    if len(label_one)>LIMIT_NEWS: #在这里一般只会超出臭猪，
+        label_one = label_one[:LIMIT_NEWS]
+    if len(label_two)>LIMIT_NEWS: #在这里一般只会超出臭猪，
+        label_two = label_two[:LIMIT_NEWS]
+
+    if len(label_three)>LIMIT_NEWS: #在这里一般只会超出臭猪，
+        label_three = label_three[:LIMIT_NEWS]
+
+    #包装返回
+    result_dict['banners'] = lb_news #轮播图
+    result_dict['news'] = label_one # 新闻
+    result_dict['local'] = label_two #地方动态
+    result_dict['provincial'] = label_three #学会
+
+    return result_dict
+        #
+        #
+        # # 如果result_list为空，说明用户没有在地方科协兼职，那么返回数据库最新的新闻
+        # if not result_list:
+        #     return sorted(search_data_from_mysql(DFKX), key=itemgetter('priority', 'news_time'), reverse=True)
+
+    # # 补充新闻数量
+    # if len(result_list) < MAX_NEWS_NUMBER:
+    #     get_enough_news(result_list, DFKX)
+    #     return result_list
+    # else:
+    #     return result_list[:MAX_NEWS_NUMBER]
+
+
+# 得到已经检索的新闻id
+def get_news_id(news_list):
+    id_list = []
+    for one_news in news_list:
+        news_id = one_news['news_id']
+        index = news_id.rindex("_")
+        number = news_id[index + 1:]
+        id_list.append(int(number))
+    return id_list
 
 # 根据部门和频道获
 def channel_branch(channel, branch, flag=0):
@@ -485,7 +543,7 @@ def get_all_channel():
 def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[], label=None, LB=False):
     result = []
     data = None
-    # 先按照科协的label检索
+    # label检索
     if label:
         try:
             data = myModel.objects.filter(hidden=1).filter(label=label).exclude(id__in=id__list).values_list('id',
@@ -502,7 +560,7 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
     elif LB:  # 找轮播图
         try:
-            data = KX.objects.filter(~Q(img=None)).filter(~Q(img='')).values_list('id', 'title', 'img', 'time',
+            data = myModel.objects.filter(~Q(img=None)).filter(~Q(img='')).values_list('id', 'title', 'img', 'time',
                                                                                   'source', 'comment', 'like',
                                                                                   'priority', 'label').order_by(
                 '-time')[:n]
@@ -537,6 +595,7 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
             news_id = str(myModel._meta.db_table) + '_' + str(one[0])
             temp_dict['news_id'] = news_id
             temp_dict['news_title'] = one[1]
+
             #在这里要进行img
             temp_dict['news_img'] = CommonMethod.get_correct_img(one[2])
             temp_dict['news_time'] = str(one[3])
