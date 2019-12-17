@@ -592,6 +592,52 @@ def deal_imgs_and_a(base_url, content=None, imgs=None):
 #########################3###########爬取每天的置顶时政新闻，来自与中国网#############################################################
 def china_top_news():
     result_dict = {}
+    url = 'http://www.people.com.cn/'
+    soup = rm_spider_head(url)
+    if not soup:
+        return result_dict
+
+    try:
+        news = soup.select('#rmw_topline h1 a')[0]
+        news_title = news.text
+        news_url = news['href']
+        news_time = time.strftime('%Y-%m-%d')
+    except Exception as err:
+        news_title = None
+        news_url = None
+        news_time = None
+    # 没有url就不爬了
+    if not news_url:
+        return result_dict
+    try:
+        ssoup = rm_spider_head(news_url)
+        try:
+            content = ssoup.select('#rwb_zw')[0]
+            imgs = content.findAll("img")
+            if imgs:
+                img = imgs[0]['src']
+            else:
+                img = IMG
+        except Exception as err:
+            print(err)
+            print('爬取失败')
+        try:
+            # 把新闻的开始的视频处理了
+            content.select("#videoarea")[0].extract()
+        except:
+            pass
+        try:
+            content.select("embed")[0].extract()
+        except:
+            pass
+        content = re.sub(r"width", '', str(content))
+        content = re.sub(r"heigh", '', str(content))
+    except Exception as err:
+        print(err)
+    return package_data_dict(title=news_title, url=news_url, img=img, content=content, date=news_time,
+                             source='人民网人民日报')
+def china_top_news_222():
+    result_dict = {}
 
     url = r'http://www.china.com.cn/'
     headers = {
@@ -620,15 +666,17 @@ def china_top_news():
         r = requests.get(url=news_url, headers=headers)
         html = r.text.encode(r.encoding).decode()
         soup = BeautifulSoup(html, 'lxml')
+        print(soup)
         try:
-            content = soup.select('.articleBody')[0]
+            content = soup.select('.articleBody')
+            #[0]
         except Exception as err:
-            #print('第一次失败')
-            #print(err)
+            print('第一次失败')
+            print(err)
             try:
                 content = soup.select('.main')[0]
             except Exception as err:
-                #print('第二次获取失败')
+                print('第二次获取失败')
                 #print(err)
                 try:
                     content = soup.select('.artiContent')[0]
@@ -672,7 +720,6 @@ def china_top_news():
         img = imgs[0]
     else:
         img = IMG
-
     return package_data_dict(title=news_title, url=news_url, img=img, content=content, date=news_time,
                              source='中国网-新闻中心')
 
