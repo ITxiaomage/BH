@@ -183,7 +183,10 @@ def handle_website_xuehui( data, table,cursor):
                 if not content or content == "空"  or title == "空" or source == "空":
                     continue
                 #处理日期
-                date = datetime.datetime.now().strftime('%Y-%m-%d')
+                try:
+                    datetime.datetime.strptime(date, "%Y-%m-%d")
+                except:
+                    date = datetime.datetime.now().strftime('%Y-%m-%d')
                 #数据封装进字典
                 result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=source,tag = 2))
 
