@@ -34,7 +34,6 @@ def get_selenium_head(url):
     try:
         driver.get(url)
     except Exception as err:
-        print(err)
         driver = None
     return driver
 
@@ -77,7 +76,6 @@ def complete_img_a(base_url, content):
             try:
                 old_href = str(a_href["href"])
             except Exception as err:
-                pass
                 continue
             if old_href.startswith("http"):
                 new_href = old_href
@@ -114,7 +112,7 @@ def s_complete_img_a(base_url, content):
                 old_href = str(a_href.get_attribute("href"))
             except Exception as err:
                 # print('a标签没有href属性')
-                # print(err)
+                # None
                 continue
             if old_href.startswith("http"):
                 new_href = old_href
@@ -134,7 +132,7 @@ def get_bjkx_news(label, url, base_url=r'http://www.bast.net.cn'):
     try:
         gzdt_news_list = soup.find_all("div", id="72459")[0].select("ul>li")
     except Exception as err:
-        #print(err)
+        #None
         gzdt_news_list = []
 
     for one_gzdt_news in gzdt_news_list:
@@ -187,7 +185,7 @@ def get_bjkx():
         result_list.extend(get_bjkx_news(2, r'http://www.bast.net.cn/col/col16647/index.html'))  # 2
         result_list.extend(get_bjkx_news(2, r'http://www.bast.net.cn/col/col16648/index.html'))  # 2
     except Exception as err:
-        print(err)
+        None
     finally:
         return result_list
     ############list类型的temp_dict转换为json#############
@@ -251,7 +249,7 @@ def get_ahkx():
         result_list.extend(get_ankx_news(2,
                                          r"http://www.ahpst.net.cn/ahpst/web/list.jsp?strColId=1435548532739006"))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "ahkx.json")
         return result_list
@@ -309,7 +307,7 @@ def get_fjkx():
         result_list.extend(get_fjkx_news(2,
                                          r"http://www.fjkx.org/NewsList.aspx?ID=8"))
     except Exception as err:
-        print(err)
+        pass
     finally:
         return result_list
 
@@ -368,7 +366,7 @@ def get_gskx():
         result_list.extend(get_gskx_news(2,
                                          r"http://www.gsast.org.cn/jcdt/tsskx3/szxw2"))
     except Exception as err:
-        print(err)
+        pass
     finally:
         return result_list
 
@@ -451,7 +449,7 @@ def get_gdkx():
         result_list.extend(get_gdkx_newss(3, r'http://gdsta.cn/Category_221/Index.aspx'))
         result_list.extend(get_gdkx_newss(2, r'http://gdsta.cn/Category_29/Index.aspx'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "gdkx.json")
         return result_list
@@ -500,7 +498,7 @@ def get_gxkx():
         result_list.extend(get_gxkx_news(2, r'http://www.gxast.org.cn/jckp/index.jhtml'))
         result_list.extend(get_gxkx_news(2, r'http://www.gxast.org.cn/kepudongtai/index.jhtml'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "gxkx.json")
         return result_list
@@ -564,7 +562,7 @@ def get_hnkx():
         result_list.extend(get_hnkx_news(2, r'http://www.hainanast.org.cn/wz_list.asp?daohang_id=59'))
         result_list.extend(get_hnkx_news(3, r'http://www.hainanast.org.cn/wz_list.asp?daohang_id=73'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "hnkx.json")
         return result_list
@@ -616,7 +614,7 @@ def get_gzkx():
         result_list.extend(get_gzkx_news(1, r'http://www.gzast.org/kxdt/dggz/index.shtml'))
         result_list.extend(get_gzkx_news(2, r'http://www.gzast.org/kxdt/dfkx/index.shtml'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "gzkx.json")
         return result_list
@@ -637,7 +635,7 @@ def get_hbkx_news(label, url, base_url=r'http://www.hbast.org.cn'):
         for one_news in news_list:
             if (one_news.find_elements_by_tag_name("a")):
                 news_title = str(one_news.find_elements_by_tag_name("a")[0].text)
-                #print(news_title)
+                print(news_title)
                 news_url = str(one_news.find_elements_by_tag_name("a")[0].get_attribute("href"))
                 news_label = str(label)
                 try:
@@ -684,7 +682,7 @@ def get_hbkx():
         result_list.extend(get_hbkx_news(2, r'http://www.hbast.org.cn/News/GZDT/KP/index.html'))
         result_list.extend(get_hbkx_news(2, r'http://www.hbast.org.cn/News/TTXW/index.html'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "hbkx.json")
         return result_list
@@ -744,7 +742,7 @@ def get_henankx():
         result_list.extend(get_henankx_news(3, r'http://www.hast.net.cn/general?cid=189'))
         result_list.extend(get_henankx_news(2, r'http://www.hast.net.cn/organization?cid=204'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "henan.json")
         return result_list
@@ -785,12 +783,12 @@ def get_hljkx_news(label, url, base_url=r'http://www.hljkx.org.cn'):
                         source='黑龙江省科学技术协会', label=news_label, tag=1))
 
             except Exception as err:
-                print(err)
+                pass
 
             finally:
                 ssoup.quit()
     except Exception as err:
-        print(err)
+        pass
     finally:
         soup.quit()
         return temp_list
@@ -806,7 +804,7 @@ def get_hljkx():
         result_list.extend(get_hljkx_news(2, r'http://www.hljkx.org.cn/col/col621/index.html'))
         result_list.extend(get_hljkx_news(3, r'http://www.hljkx.org.cn/col/col1003/index.html'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "hlj.json")
         return result_list
@@ -848,10 +846,10 @@ def get_hubeikx_news(label, url, base_url=r'http://www.hbkx.org.cn'):
                         source='湖北省科学技术协会', label=news_label, tag=1))
 
             except Exception as err:
-                print(err)
+                pass
                 #print("error occors while request " + news_url + " !!!!!")
     except Exception as err:
-        print(err)
+        pass
         #print("an error occors while request " + url + " !!!!!")
     return temp_list
 
@@ -874,7 +872,7 @@ def get_hubeikx():
         result_list.extend(
             get_hubeikx_news(1, r'http://www.hbkx.org.cn/news/list?columnid=0559e99867bb4039958aaff8fdf73cb1'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "hubei.json")
         return result_list
@@ -978,12 +976,12 @@ def get_hunankx_nnews(label, url, base_url=r'http://www.hnast.org.cn'):
                             content=news_content, date=news_time,
                             source='湖南省科学技术协会', label=news_label, tag=1))
                 except Exception as err:
-                    print(err)
+                    pass
                 finally:
                     ssoup.quit()
 
     except Exception as err:
-        print(err)
+        pass
     finally:
         soup.quit()
         return temp_list
@@ -1039,7 +1037,7 @@ def get_hunankx():
         result_list.extend(get_hunankx_news(2, r'http://www.hnast.org.cn/portal/work/more.action?categoryno=6'))
         result_list.extend(get_hunankx_nnnews(1, r'http://www.hnast.org.cn/portal/notice/more.action'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "hunan.json")
         return result_list
@@ -1083,7 +1081,7 @@ def get_jlkx():
         result_list.extend(get_jlkx_news(2, r'http://achievements.jlskx.org.cn/web/news/pagenews/103/0/15/skx'))
         result_list.extend(get_jlkx_news(3, r'http://achievements.jlskx.org.cn/web/news/pagenews/566/0/15/skx'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "jlkx.json")
         return result_list
@@ -1248,7 +1246,7 @@ def get_jskx():
         result_list.extend(get_jskx_nnnews(3, r'http://www.jsxhw.org/default.php?mod=article&fid=30'))
         result_list.extend(get_jskx_news(2, r'http://www.jskx.org.cn/web/kepu/gzdt/1'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "jskx.json")
         return result_list
@@ -1300,7 +1298,7 @@ def get_jxkx():
         result_list.extend(get_jxkx_news(3, r'http://www.jxkx.gov.cn/class.asp?id=8'))
         result_list.extend(get_jxkx_news(2, r'http://www.jxkx.gov.cn/class.asp?id=24'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "jxkx.json")
         return result_list
@@ -1456,7 +1454,7 @@ def get_lnkx():
         result_list.extend(get_lnkx_news(3, r'http://www.lnast.net/xshxh/xshd.aspx'))
         result_list.extend(get_lnkx_news(2, r'http://www.lnast.net/kxpj/kpxdjh.aspx'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "lnkx.json")
         return result_list
@@ -1493,11 +1491,11 @@ def get_nmgkx_news(label, url, base_url=r'http://www.imast.org.cn'):
                         source='内蒙古自治区科学技术协会', label=news_label, tag=1))
 
             except Exception as err:
-                print(err)
+                pass
             finally:
                 ssoup.quit()
     except Exception as err:
-        print(err)
+        pass
     finally:
         soup.quit()
         return temp_list
@@ -1515,7 +1513,7 @@ def get_nmgkx():
         result_list.extend(get_nmgkx_news(3, r'http://www.imast.org.cn/xwdt/xsxh/xshd/'))
         result_list.extend(get_nmgkx_news(2, r'http://www.imast.org.cn/xwdt/kxpj/jckp/'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "nmgkx.json")
         return result_list
@@ -1563,7 +1561,7 @@ def get_nxkx_news(label, url, base_url=r'http://www.nxkx.org'):
 
             ssoup.quit()
         except Exception as err:
-            print(err)
+            pass
             #print("can not get  " + news_url)
     return temp_list
 
@@ -1604,7 +1602,7 @@ def get_nxkx_nnews(label, url, base_url=r'http://www.yckpw.gov.cn/kpdt/gzdt'):
                     source='宁夏回族自治区科学技术协会', label=news_label, tag=1))
 
         except Exception as err:
-            print(err)
+            pass
         finally:
             ssoup.quit()
     return temp_list
@@ -1628,7 +1626,7 @@ def get_nxkx():
         result_list.extend(
             get_nxkx_news(2, r'http://www.nxkx.org/kxsz/jcdt/', base_url=r"http://www.nxkx.org/kxsz/jcdt/"))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "nxkx.json")
         return result_list
@@ -1670,7 +1668,7 @@ def get_qhkx_news(label, url, base_url=r'http://www.qhkxw.com'):
                     content=news_content, date=news_time,
                     source='青海省科学技术协会', label=news_label, tag=1))
         except Exception as err:
-            print(err)
+            pass
         finally:
             ssoup.quit()
     return temp_list
@@ -1686,7 +1684,7 @@ def get_qhkx():
         result_list.append(get_qhkx_news(3, r'http://www.qhkxw.com/xhxs/'))
         result_list.append(get_qhkx_news(2, r'http://www.qhkxw.com/jckx/'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "qhkx.json")
         return result_list
@@ -1725,7 +1723,7 @@ def get_sdkx_news(label, url, base_url=r'http://www.qhkxw.com'):
                     content=news_content, date=news_time,
                     source='山东省科学技术协会', label=news_label, tag=1))
         except Exception as err:
-            print(err)
+            pass
         finally:
             ssoup.quit()
 
@@ -1742,7 +1740,7 @@ def get_sdkx():
         result_list.extend(get_sdkx_news(3, r'http://www.sdast.org.cn/col/col60374/index.html'))
         result_list.extend(get_sdkx_news(2, r'http://www.sdast.org.cn/col/col60707/index.html'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "sdkx.json")
         return result_list
@@ -1782,7 +1780,7 @@ def get_sxkx_news(label, url, base_url=r'http://www.sxast.cn'):
                     content=news_content, date=news_time,
                     source='山西省科学技术协会', label=news_label, tag=1))
         except Exception as err:
-            print(err)
+            pass
         finally:
             ssoup.quit()
     return temp_list
@@ -1798,7 +1796,7 @@ def get_sxkx():
         result_list.extend(get_sxkx_news(3, r'http://www.sxast.cn/html/lm/syxhdt/index.html'))
         result_list.extend(get_sxkx_news(1, r'http://www.sxast.cn/html/lm/dztt/index.html'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "sxkx.json")
         return result_list
@@ -1836,7 +1834,6 @@ def get_shanxikx_news(label, url, base_url=r'http://www.snast.org.cn'):
                 title=news_title, url=news_url, img=news_img,
                 content=news_content, date=news_time,
                 source='陕西省科学技术协会', label=news_label, tag=1))
-
     return temp_list
 
 
@@ -1850,7 +1847,7 @@ def get_shanxikx():
         result_list.extend(get_shanxikx_news(3, r'http://www.snast.org.cn/admin/pub_newschannel.asp?chid=100058'))
         result_list.extend(get_shanxikx_news(1, r'http://www.snast.org.cn/admin/pub_newschannel.asp?chid=100043'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "shanxikx.json")
         return result_list
@@ -1887,11 +1884,11 @@ def get_shkx_news(label, url, base_url=r'http://www.sast.gov.cn'):
                         source='上海市科学技术协会', label=news_label, tag=1))
 
             except Exception as err:
-                print(err)
+                pass
             finally:
                 ssoup.quit()
     except Exception as err:
-        print(err)
+        pass
     finally:
         soup.quit()
         return temp_list
@@ -1924,11 +1921,11 @@ def get_shkx_nnews(label, url, base_url=r'http://www.sast.gov.cn'):
                         source='上海市科学技术协会', label=news_label, tag=1))
 
             except Exception as err :
-                print(err)
+                pass
             finally:
                 ssoup.quit()
     except Exception as err:
-        print(err)
+        pass
     finally:
         soup.quit()
         return temp_list
@@ -1943,7 +1940,7 @@ def get_shkx():
         result_list.extend(get_shkx_nnews(2, r'http://www.sast.gov.cn/list/37.html'))
         result_list.extend(get_shkx_nnews(3, r'http://www.sast.gov.cn/list/109.html'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "shkx.json")
         return result_list
@@ -1957,6 +1954,7 @@ def get_sckx_news(label, url, base_url=r'http://www.sckx.org.cn'):
         return temp_list
     try:
         news_list = soup.find_all("div", class_="center-content")[0].select("div")
+        print(len(news_list))
     except:
         news_list = []
     for one_news in news_list:
@@ -2034,7 +2032,7 @@ def get_sckx():
         result_list.extend(get_sckx_nnews(2,
                                           r'http://www.sckx.org.cn/views/news/list/052ca9ea-2cff-4058-bc3f-8c31c892dc84/15/1.html'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "sckx.json")
         return result_list
@@ -2049,10 +2047,12 @@ def get_tjkx_news(label, url, base_url=r'http://www.tast.org.cn'):
     try:
         # print(soup)
         news_list = soup.find_all("td", class_="weiruan16 hanggao35")[0].select("tr")
+        print(len(news_list))
     except:
         news_list = []
     for one_news in news_list:
         news_title = one_news.select("td")[1].select("a")[0].text
+        print(news_title)
         news_url = one_news.select("td")[1].select("a")[0]["href"]
         # news_url = str(base_url + news_url)
         news_time = str(one_news.select("td")[2].text)
@@ -2064,6 +2064,7 @@ def get_tjkx_news(label, url, base_url=r'http://www.tast.org.cn'):
         news_zoom = ssoup.find_all("td", class_="weiruan16 hanggao35")[0]
         # bs = BeautifulSoup(news_zoom.get_attribute("outerHTML"), 'lxml')
         news_img = complete_img_a(base_url, news_zoom)
+        print(news_img)
         if not news_img: news_img = None
         news_content = str(news_zoom)
         # dict = dict_list(news_title, news_url, news_img, news_content, news_time, news_label)
@@ -2087,7 +2088,7 @@ def get_tjkx():
         result_list.extend(get_tjkx_news(3, r'http://www.tast.org.cn/sjxh/'))
         result_list.extend(get_tjkx_news(2, r'http://www.tast.org.cn/jckx/'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "tjkx.json")
         return result_list
@@ -2142,7 +2143,7 @@ def get_xzkx():
         result_list.extend(get_xzkx_news(3,
                                          r'http://kjg.cdstm.cn/index.php?m=Index&a=showpage&wsid=39&pagename=newslist&channel=xhxs&cid=23'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "xzkx.json")
         return result_list
@@ -2194,7 +2195,7 @@ def get_xjbtkx():
         result_list.extend(get_xjbtkx_news(3, r'http://kjj.xjbt.gov.cn/kjgl/kxpj/'))
         result_list.extend(get_xjbtkx_news(1, r'http://kjj.xjbt.gov.cn/xxgk/'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "xjbtkx.json")
         return result_list
@@ -2253,7 +2254,7 @@ def get_xjkx():
         result_list.extend(get_xjkx_news(2, r'https://www.xast.org.cn/index/dfdt.htm'))
         result_list.extend(get_xjkx_news(2, r'https://www.xast.org.cn/xwdt/jczx.htm'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "xjkx.json")
         return result_list
@@ -2319,7 +2320,7 @@ def get_ynkx():
         result_list.extend(get_ynkx_news(2, r'http://www.yunast.cn/site/yunast/kxywjczx/index.html'))
         result_list.extend(get_ynkx_news(2, r'http://www.yunast.cn/site/yunast/qsnkp/index.html'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "ynkx.json")
         return result_list
@@ -2352,12 +2353,12 @@ def get_zjkx_news(label, url, base_url=r'http://www.zast.org.cn/'):
                         content=news_content, date=news_time,
                         source='浙江省科学技术协会', label=news_label, tag=1))
             except Exception as err:
-                print(err)
+                pass
             finally:
                 ssoup.quit()
 
     except Exception as err:
-        print(err)
+        pass
     finally:
         soup.quit()
         return temp_list
@@ -2373,7 +2374,7 @@ def get_zjkx():
         result_list.extend(get_zjkx_news(3, r'http://www.zast.org.cn/col/col1673858/index.html'))
         result_list.extend(get_zjkx_news(2, r'http://www.zast.org.cn/col/col1673839/index.html'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "zjkx.json")
         return result_list
@@ -2407,7 +2408,7 @@ def get_cqkx_news(label, url, base_url=r'http://www.tast.org.cn'):
                     content=news_content, date=news_time,
                     source='重庆市科学技术协会', label=news_label, tag=1))
     except Exception as err:
-        print(err)
+        pass
        # print("can not get " + url)
     return temp_list
 
@@ -2443,7 +2444,7 @@ def get_cqkx_nnews(label, url, base_url=r'http://www.tast.org.cn'):
                     content=news_content, date=news_time,
                     source='重庆市科学技术协会', label=news_label, tag=1))
         except Exception as err:
-            print(err)
+            pass
             #print("can not get " + news_url)
     return temp_list
 
@@ -2458,7 +2459,7 @@ def get_cqkx():
         result_list.extend(get_cqkx_nnews(3, r'http://www.cqast.cn/htm/col374596.htm'))
         result_list.extend(get_cqkx_nnews(2, r'http://www.cqast.cn/htm/col374627.htm'))
     except Exception as err:
-        print(err)
+        pass
     finally:
         #news_to_json(result_list, "cqkx.json")
         return result_list
@@ -2470,10 +2471,10 @@ def spider_data_into_mysql(news_list):
             news = DFKX(**one_news)
             try:
                 news.save()
-                #print('Successful')
+                print('Successful')
             except Exception as e:
-                pass
-                #print(e)
+                #pass
+                print(e)
 
 
 def start_dfkx_spider():
@@ -2506,29 +2507,29 @@ def start_dfkx_spider():
         spider_data_into_mysql(get_jlkx())
         #江苏 测试完毕
         spider_data_into_mysql(get_jskx())
-        #江西
+        #江西 数据库有
         spider_data_into_mysql(get_jxkx())
-        #辽宁
+        #辽宁  数据库有
         spider_data_into_mysql(get_lnkx())
-        #内蒙古
+        #内蒙古 数据库有
         spider_data_into_mysql(get_nmgkx())
-        #宁夏
+        #宁夏 数据库有
         spider_data_into_mysql(get_nxkx())
-        #青海  出错
+        #青海  出错  数据库无
         spider_data_into_mysql(get_qhkx())
-        # 山东  出错
+        # 山东  出错  数据库无
         spider_data_into_mysql(get_sdkx())
-        # 山西 出错
+        # 山西 出错  数据库无
         spider_data_into_mysql(get_sxkx())
-        #陕西 出错
+        #陕西 出错  地址错误
         spider_data_into_mysql(get_shanxikx())
-        #上海 出错
+        #上海 出错  异常出错
         spider_data_into_mysql(get_shkx())
-        #四川 出错
+        #四川 出错  数据库无
         spider_data_into_mysql(get_sckx())
         #天津  出错
         spider_data_into_mysql(get_tjkx())
-        #西藏 出错
+        # #西藏 出错
         spider_data_into_mysql(get_xzkx())
         #新疆 维吾尔  出错
         spider_data_into_mysql(get_xjkx())
@@ -2540,5 +2541,7 @@ def start_dfkx_spider():
         spider_data_into_mysql(get_zjkx())
         #重庆 出错
         spider_data_into_mysql(get_cqkx())
+        # 北京科协
+        spider_data_into_mysql(get_bjkx())
     except Exception as e:
         print(e)
