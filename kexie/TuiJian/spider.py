@@ -17,8 +17,6 @@ from .models import *
 from .define import *
 
 
-
-
 #################################科协一家提供的新闻资讯和专家观点#####################################
 # 新闻资讯
 def get_kxyj_news(url=r'http://ypt.cnki.net/znapp/ScienceAPI/GetKXHotList?keyWord=&pageIndex=1&pageSize=10',
@@ -237,7 +235,7 @@ def update_kexie_news():
         # 新闻
         tt_url = r'http://www.cast.org.cn/col/col79/index.html'
         yw_url = r'http://www.cast.org.cn/col/col80/index.html'
-        #通知 学术学会 科学普及
+        # 通知 学术学会 科学普及
         tzgc_url = r'http://www.cast.org.cn/col/col457/index.html'
         tzxsxh = r'http://www.cast.org.cn/col/col458/index.html'
         tzkxpj = r'http://www.cast.org.cn/col/col459/index.html'
@@ -255,40 +253,40 @@ def update_kexie_news():
             result_list.extend(get_kx_data(browser, tt_url, base_url, 1))
         except Exception as err:
             print('头条新闻出错')
-            #print(err)
+            # print(err)
         try:
             # 要闻
             result_list.extend(get_kx_data(browser, yw_url, base_url, 1))
         except Exception as err:
             print('要闻出错')
-            #print(err)
+            # print(err)
         try:
             # 通知
             result_list.extend(get_kx_data(browser, tzgc_url, base_url, 3))
         except Exception as err:
             print('通知出错')
-            #print(err)
+            # print(err)
             pass
         try:
             # 学术学会
             result_list.extend(get_kx_data(browser, tzxsxh, base_url, 3))
         except Exception as err:
             print('通知出错')
-            #print(err)
+            # print(err)
             pass
         try:
             # 科学普及
             result_list.extend(get_kx_data(browser, tzkxpj, base_url, 3))
         except Exception as err:
             print('通知出错')
-            #print(err)
+            # print(err)
             pass
         try:
             # 组织普及
             result_list.extend(get_kx_data(browser, zzpj, base_url, 3))
         except Exception as err:
             print('通知出错')
-            #print(err)
+            # print(err)
             pass
 
         try:
@@ -296,7 +294,7 @@ def update_kexie_news():
             result_list.extend(get_kx_data(browser, kxdj, base_url, 3))
         except Exception as err:
             print('通知出错')
-            #print(err)
+            # print(err)
             pass
 
         try:
@@ -304,7 +302,7 @@ def update_kexie_news():
             result_list.extend(get_kx_data(browser, jhcw, base_url, 3))
         except Exception as err:
             print('通知出错')
-            #print(err)
+            # print(err)
             pass
 
         try:
@@ -312,7 +310,7 @@ def update_kexie_news():
             result_list.extend(get_kx_data(browser, dyxc, base_url, 3))
         except Exception as err:
             print('通知出错')
-            #print(err)
+            # print(err)
             pass
 
         try:
@@ -320,22 +318,22 @@ def update_kexie_news():
             result_list.extend(get_kx_data(browser, dwjl, base_url, 3))
         except Exception as err:
             print('通知出错')
-            #print(err)
+            # print(err)
             pass
 
         try:
             result_list.extend(get_kx_video_data(browser, xhfc_url, base_url, 4))
         except Exception as err:
             print('协会风采出错')
-            #print(err)
+            # print(err)
         try:
             result_list.extend(get_kx_video_data(browser, cmkx_url, base_url, 4))
         except Exception as err:
             print('传媒风采')
-            #print(err)
+            # print(err)
     except Exception as err:
         print('爬取科协新闻出错')
-        #print(err)
+        # print(err)
     finally:
         browser.quit()
         return result_list
@@ -380,7 +378,7 @@ def get_video_content(browser, url, xpath):
 
 # 科协视频
 def get_kx_video_data(browser, url, base_url, label):
-    #print('进入官网。。。')
+    # print('进入官网。。。')
     try:
         # 进入科协官网新闻
         browser.get(url)
@@ -390,7 +388,7 @@ def get_kx_video_data(browser, url, base_url, label):
         info_list_len = len(info_list) + 1
     except:
         info_list_len = 0
-        #print('进入科协官网出错。。。')
+        # print('进入科协官网出错。。。')
 
     # 存放结果的列表
     temp_list = []
@@ -410,7 +408,7 @@ def get_kx_video_data(browser, url, base_url, label):
                 del content['height']
             except:
                 pass
-            #print(title)
+            # print(title)
             temp_list.append(
                 package_data_dict(title=title, url=news_url, img=img, content=str(content), date=video_time,
                                   source="中国科协", label=label))
@@ -419,7 +417,7 @@ def get_kx_video_data(browser, url, base_url, label):
 
 # 科协数据
 def get_kx_data(browser, url, base_url, label):
-    #print('进入{0}'.format(label))
+    # print('进入{0}'.format(label))
     try:
         # 进入科协官网新闻
         browser.get(url)
@@ -427,11 +425,11 @@ def get_kx_data(browser, url, base_url, label):
         # 获取列表
         info_list = browser.find_elements_by_xpath('//div[@class="bt-mod-wzpb-02"]/ul/li')
         info_list_len = len(info_list) + 1
-        #print(info_list_len)
+        # print(info_list_len)
     except Exception as err:
         print(err)
         info_list_len = 0
-        #print('进入科协官网出错。。。')
+        # print('进入科协官网出错。。。')
 
     # 存放结果的列表
     temp_list = []
@@ -454,18 +452,18 @@ def get_kx_data(browser, url, base_url, label):
                 del content['style']
             except  Exception as err:
                 pass
-                #print('取出科协官网style错误')
-                #print(err)
+                # print('取出科协官网style错误')
+                # print(err)
             imgs = content.findAll('img')
             img_path = deal_imgs_and_a(base_url, content=content, imgs=imgs)
             content = str(content).replace("style", ' ')
-            #通知一栏不需要图片
+            # 通知一栏不需要图片
             if label == 3:
                 img_path = None
             temp_list.append(
                 package_data_dict(title=title, url=news_url, img=img_path, content=str(content), date=news_time,
                                   source="中国科协", label=label))
-            #print(title)
+            # print(title)
     return temp_list
 
 
@@ -490,7 +488,7 @@ def spider_head(url):
         html = response.text.encode(response.encoding).decode()
         soup = BeautifulSoup(html, 'lxml')
     except Exception as err:
-        #print('spider_head出错')
+        # print('spider_head出错')
         soup = None
     return soup
 
@@ -524,15 +522,15 @@ def get_content_time_img(news_url, base_url):
         try:
             a_hrefs = content.findAll('a')
         except Exception as err:
-            #print('文章中没有a链接')
+            # print('文章中没有a链接')
             a_hrefs = None
         if a_hrefs:
             for a_href in a_hrefs:
                 try:
                     old_href = a_href['href']
                 except Exception as err:
-                    #print('a标签没有href属性')
-                    #print(err)
+                    # print('a标签没有href属性')
+                    # print(err)
                     continue
                 if old_href[0] == '/':
                     new_href = base_url + old_href
@@ -571,15 +569,15 @@ def deal_imgs_and_a(base_url, content=None, imgs=None):
     try:
         a_hrefs = content.findAll('a')
     except Exception as err:
-        #print('文章中没有a链接')
+        # print('文章中没有a链接')
         a_hrefs = None
     if a_hrefs:
         for a_href in a_hrefs:
             try:
                 old_href = a_href['href']
             except Exception as err:
-                #print('a标签没有href属性')
-                #print(err)
+                # print('a标签没有href属性')
+                # print(err)
                 continue
             if old_href[0] == '/':
                 new_href = base_url + old_href
@@ -591,52 +589,6 @@ def deal_imgs_and_a(base_url, content=None, imgs=None):
 
 #########################3###########爬取每天的置顶时政新闻，来自与中国网#############################################################
 def china_top_news():
-    result_dict = {}
-    url = 'http://www.people.com.cn/'
-    soup = rm_spider_head(url)
-    if not soup:
-        return result_dict
-
-    try:
-        news = soup.select('#rmw_topline h1 a')[0]
-        news_title = news.text
-        news_url = news['href']
-        news_time = time.strftime('%Y-%m-%d')
-    except Exception as err:
-        news_title = None
-        news_url = None
-        news_time = None
-    # 没有url就不爬了
-    if not news_url:
-        return result_dict
-    try:
-        ssoup = rm_spider_head(news_url)
-        try:
-            content = ssoup.select('#rwb_zw')[0]
-            imgs = content.findAll("img")
-            if imgs:
-                img = imgs[0]['src']
-            else:
-                img = IMG
-        except Exception as err:
-            print(err)
-            print('爬取失败')
-        try:
-            # 把新闻的开始的视频处理了
-            content.select("#videoarea")[0].extract()
-        except:
-            pass
-        try:
-            content.select("embed")[0].extract()
-        except:
-            pass
-        content = re.sub(r"width", '', str(content))
-        content = re.sub(r"heigh", '', str(content))
-    except Exception as err:
-        print(err)
-    return package_data_dict(title=news_title, url=news_url, img=img, content=content, date=news_time,
-                             source='人民网人民日报')
-def china_top_news_222():
     result_dict = {}
 
     url = r'http://www.china.com.cn/'
@@ -657,71 +609,114 @@ def china_top_news_222():
     except Exception as err:
         news_title = None
         news_url = None
-        news_time = datetime.date.today()
-        #print(err)
-    #没有url就不爬了
+        news_time = None
+        # print(err)
+    # 没有url就不爬了
     if not news_url:
         return result_dict
-    try:
-        r = requests.get(url=news_url, headers=headers)
-        html = r.text.encode(r.encoding).decode()
-        soup = BeautifulSoup(html, 'lxml')
-        print(soup)
-        try:
-            content = soup.select('.articleBody')
-            #[0]
-        except Exception as err:
-            print('第一次失败')
-            print(err)
-            try:
-                content = soup.select('.main')[0]
-            except Exception as err:
-                print('第二次获取失败')
-                #print(err)
-                try:
-                    content = soup.select('.artiContent')[0]
-                except Exception as err:
-                    pass
-                    #print('第三次获取失败')
-                    #print(err)
 
+    # 用selenium爬
+    driver = init_chrome()
+    try:
+        driver.get(url=news_url)
+    except:
+        driver = None
+
+    finally:
+        driver.close()
+    if not driver:
+        return result_dict
+    try:
+        time.sleep(1)
         try:
-            # 去除文章中的注释
-            comments = soup.findAll(text=lambda text: isinstance(text, Comment))
-            if comments:
-                for comment in comments:
-                    comment.extract()
+            content = driver.find_element_by_xpath('//*[@id="articleBody"]')
+        except:
+            try:
+                content = driver.find_element_by_xpath('//*[@class="main"]')
+            except:
+                try:
+                    content = driver.find_element_by_xpath('//*[@class="artiContent"]')
+                except:
+                    content = None
+        if content:
+            bs = BeautifulSoup(content.get_attribute("outerHTML"), 'lxml')
+            imgs = bs.findAll("img")
+            if imgs:
+                img = imgs[0]['src']
+            else:
+                img = IMG
             try:
                 # 把新闻的开始的视频处理了
-                content.select("#videoarea")[0].extract()
-            except:
+                bs.select("#videoarea")[0].extract()
+            except Exception as err:
                 pass
             try:
-                # 防止最后出现的app
-                content.select(".app")[0].extract()
-            except:
+                bs.select("embed")[0].extract()
+            except Exception as err:
                 pass
 
-            try:
-                content.select("embed")[0].extract()
-            except:
-                pass
-        except Exception as err:
-            pass
-            #print(err)
+            content = re.sub(r"width", '', str(bs))
+            content = re.sub(r"heigh", '', str(content))
+        else:
+            content = None
+            img = None
     except Exception as err:
-        print(err)
-
-    # 把文章中记者的信息处理了
-    content = re.sub(r"[（](.*?)[）]", '', str(content))
-    # 图片
-    imgs = content.findAll("img")
-    if imgs:
-        img = imgs[0]
-    else:
-        img = IMG
+        content = None
+        img = None
+    finally:
+        driver.close()
     return package_data_dict(title=news_title, url=news_url, img=img, content=content, date=news_time,
                              source='中国网-新闻中心')
+    #
+    # try:
+    #     r = requests.get(url=news_url, headers=headers)
+    #     html = r.text.encode(r.encoding).decode()
+    #     soup = BeautifulSoup(html, 'lxml')
+    #     print(soup)
+    #     try:
+    #         content = soup.select('.articleBody')
+    #         #[0]
+    #     except Exception as err:
+    #         print('第一次失败')
+    #         print(err)
+    #         try:
+    #             content = soup.select('.main')[0]
+    #         except Exception as err:
+    #             print('第二次获取失败')
+    #             #print(err)
+    #             try:
+    #                 content = soup.select('.artiContent')[0]
+    #             except Exception as err:
+    #                 pass
+    #                 #print('第三次获取失败')
+    #                 #print(err)
+    #
+    #     try:
+    #         # 去除文章中的注释
+    #         comments = soup.findAll(text=lambda text: isinstance(text, Comment))
+    #         if comments:
+    #             for comment in comments:
+    #                 comment.extract()
+    #         try:
+    #             # 把新闻的开始的视频处理了
+    #             content.select("#videoarea")[0].extract()
+    #         except:
+    #             pass
+    #         try:
+    #             # 防止最后出现的app
+    #             content.select(".app")[0].extract()
+    #         except:
+    #             pass
+    #
+    #         try:
+    #             content.select("embed")[0].extract()
+    #         except:
+    #             pass
+    #     except Exception as err:
+    #         pass
+    #         #print(err)
+    # except Exception as err:
+    #     print(err)
 
 
 ####################################新闻TF_IDF的提取#############################################################
@@ -738,8 +733,8 @@ def TF_IDF(content, n=MAX_KEYWORDS):
 
 
 ####################################将新闻相关信息打包为一个字典#############################################################
-#tag = 1 代表的是地方科协，tag =2 代表的是全国学会
-def package_data_dict(title=None, url=None, img=None, content=None, date=None, source=None, label=None , tag =None):
+# tag = 1 代表的是地方科协，tag =2 代表的是全国学会
+def package_data_dict(title=None, url=None, img=None, content=None, date=None, source=None, label=None, tag=None):
     temp_dict = {}
     if label == 4:  # 视频就是以标题作为关键字
         keywords = TF_IDF(title, MAX_KEYWORDS)
@@ -747,7 +742,7 @@ def package_data_dict(title=None, url=None, img=None, content=None, date=None, s
         keywords = TF_IDF(content, MAX_KEYWORDS)
     temp_dict['title'] = title
     temp_dict['url'] = url
-    new_content = str(content).replace('style',' ').replace('width',' ').replace('height',' ')
+    new_content = str(content).replace('style', ' ').replace('width', ' ').replace('height', ' ')
     temp_dict['content'] = new_content
     temp_dict['img'] = img
     # 先将字符串形式的日期转化为date类型
