@@ -184,8 +184,8 @@ def get_news_list_accord_user_images(mymodels, user_images_dict):
             score = one_label['score']
             # 计算label的词向量
             label_vec = cal_d2v(label)
-            # 获取候选新闻列表，根据新闻id获取新闻详情，然后计算相似性
-            first_news_list = search_data_from_mysql(mymodels, MAX_SEARCH_NEWS)
+            # 获取候选新闻列表，根据新闻id获取新闻详情，然后计算相似性  暂时只检索有图片的新闻
+            first_news_list = search_data_from_mysql(mymodels, MAX_SEARCH_NEWS, LB=True)
             for one_news in first_news_list:
                 news_id = one_news['news_id']
                 news_info = accord_news_id_get_content_list(news_id)
@@ -358,7 +358,8 @@ def get_dfkx_news_list(department):
                 source = accord_number_get_department(one_dep)
                 # 每个部门都需要检索标签为1.2.3的新闻资讯
                 label_one.extend(search_data_from_mysql(myModel=DFKX, n = LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0], label=1))
-                label_two.extend(search_data_from_mysql(myModel=DFKX, n = LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0],label=2))
+                #这个新闻必须有图片
+                label_two.extend(search_data_from_mysql(myModel=DFKX, n = LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0],label=2, LB=True))
                 label_three.extend(search_data_from_mysql(myModel=DFKX, n =LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0],label=3))
 
     # 如果长度不够就补充新闻，要不然最多返回三个
@@ -367,10 +368,11 @@ def get_dfkx_news_list(department):
         id_list.extend(get_news_id(label_one))
         label_one.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list,n =LIMIT_NEWS,label=1))
 
+    #必须要有图
     if len(label_two) < LIMIT_NEWS:
         id_list =[]
         id_list.extend(get_news_id(label_two))
-        label_two.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list, n=LIMIT_NEWS, label=2))
+        label_two.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list, n=LIMIT_NEWS, label=2, LB=True))
 
     if len(label_three) < LIMIT_NEWS:
         id_list =[]
