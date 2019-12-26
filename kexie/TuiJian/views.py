@@ -110,9 +110,9 @@ def get_user_news_list(request):
 def accord_user_id_get_news_list(user_id, department, channel, flag):
     # 在时政要闻和科技热点进行个性化推荐
     if channel == CHANNEL_SZYW:
-        result_list = individual(user_id, channel, News, LB=True)#时政频道暂时设置全部是带图片的
+        result_list = individual(user_id, channel, News, LB=True)#暂时设置全部是带图片的
     elif channel == CHANNEL_KJRD:
-        result_list = individual(user_id, channel, TECH)
+        result_list = individual(user_id, channel, TECH, LB=True)
     # 中国科协
     elif channel == CHANNEL_ZGKX:
         result_list = search_kx_data_from_mysql(flag)
@@ -140,10 +140,7 @@ def individual(user_id, channel, mymodel,LB=None):
 
         # 用户不存在就按照检索10条数据create_new_user_in_mongo
     if not user or user_id == '999':
-        if LB :
-            return accord_label_get_news(mymodel, LB) #时政频道暂时设置全部图片
-        else:
-            return accord_label_get_news(mymodel)
+        return accord_label_get_news(mymodel, LB)  # 暂时设置全部图片
 
     # 有用户就根据用户画像检索新闻
     user_images_dict = get_user_images_accord_user_id_channel(user_id, channel)
@@ -152,7 +149,7 @@ def individual(user_id, channel, mymodel,LB=None):
 
 
 # 数据库的种类都查询10条 排序返回
-def accord_label_get_news(mymodels,LB=None):
+def accord_label_get_news(mymodels, LB=None):
     result_list = []
     result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, LB=LB))
     # result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2, LB=LB))
