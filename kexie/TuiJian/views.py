@@ -110,7 +110,7 @@ def get_user_news_list(request):
 def accord_user_id_get_news_list(user_id, department, channel, flag):
     # 在时政要闻和科技热点进行个性化推荐
     if channel == CHANNEL_SZYW:
-        result_list = individual(user_id, channel, News)
+        result_list = individual(user_id, channel, News, LB=True)#时政频道暂时设置全部是带图片的
     elif channel == CHANNEL_KJRD:
         result_list = individual(user_id, channel, TECH)
     # 中国科协
@@ -129,7 +129,7 @@ def accord_user_id_get_news_list(user_id, department, channel, flag):
 
 
 # 个性化推荐算法
-def individual(user_id, channel, mymodel):
+def individual(user_id, channel, mymodel,LB=None):
     result_list = []
     # 先检测用户是否存在，不存在就创建新的用户，按照时间返回新闻
     user = search_user_from_momgodb(id=user_id)
@@ -140,7 +140,10 @@ def individual(user_id, channel, mymodel):
 
         # 用户不存在就按照检索10条数据create_new_user_in_mongo
     if not user or user_id == '999':
-        return accord_label_get_news(mymodel)
+        if LB :
+            return accord_label_get_news(mymodel,LB) #时政频道暂时设置全部图片
+        else:
+            return accord_label_get_news(mymodel)
 
     # 有用户就根据用户画像检索新闻
     user_images_dict = get_user_images_accord_user_id_channel(user_id, channel)
@@ -149,12 +152,12 @@ def individual(user_id, channel, mymodel):
 
 
 # 数据库的种类都查询5条 排序返回
-def accord_label_get_news(mymodels):
+def accord_label_get_news(mymodels,LB=None):
     result_list = []
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=1))
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2))
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=3))
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=4))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=1, LB=LB))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2, LB=LB))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=3, LB=LB))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=4, LB=LB))
     temp_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
     return limit_ten_news(temp_list)
 
