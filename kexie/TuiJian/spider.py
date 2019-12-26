@@ -211,7 +211,7 @@ def get_rmw_data_dict(news_url=None, news_content=None, news_title=None, news_im
             imgs = news_content.findAll('img')
             news_img = deal_imgs_and_a(base_url, content=news_content, imgs=imgs)
         except:
-            news_img = ' '
+            news_img = ''
     except Exception as err:
         print('爬取新闻{0}出错'.format(news_url))
         pass
