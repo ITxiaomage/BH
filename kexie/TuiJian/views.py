@@ -141,7 +141,7 @@ def individual(user_id, channel, mymodel,LB=None):
         # 用户不存在就按照检索10条数据create_new_user_in_mongo
     if not user or user_id == '999':
         if LB :
-            return accord_label_get_news(mymodel,LB) #时政频道暂时设置全部图片
+            return accord_label_get_news(mymodel, LB) #时政频道暂时设置全部图片
         else:
             return accord_label_get_news(mymodel)
 
@@ -151,13 +151,13 @@ def individual(user_id, channel, mymodel,LB=None):
     return limit_ten_news(result_list)
 
 
-# 数据库的种类都查询5条 排序返回
+# 数据库的种类都查询10条 排序返回
 def accord_label_get_news(mymodels,LB=None):
     result_list = []
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=1, LB=LB))
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2, LB=LB))
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=3, LB=LB))
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=4, LB=LB))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, LB=LB))
+    # result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2, LB=LB))
+    # result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=3, LB=LB))
+    # result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=4, LB=LB))
     temp_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
     return limit_ten_news(temp_list)
 
