@@ -82,6 +82,16 @@ class NewsBase(models.Model):
         abstract = True
         ordering=['-time']
 
+
+## 临时增加一个疫情防控的表
+class YQFK(NewsBase):
+    source = models.CharField(max_length=255, null=True, verbose_name='新闻来源', blank=True)
+    class Meta:
+        db_table = "yqfk"
+        verbose_name = "疫情防控新闻"
+        verbose_name_plural = "疫情防控新闻"
+
+
 class News(NewsBase):
     source = models.CharField(max_length=255, null=True, verbose_name='新闻来源', blank=True)
     class Meta:
@@ -124,6 +134,7 @@ class ChinaTopNews(NewsBase):
         db_table = "chinaTopNews"
         verbose_name = "中央领导人新闻"
         verbose_name_plural = "中央领导人新闻"
+
 
 class ChannelToDatabase(models.Model):
     channel = models.CharField(max_length=255,unique=True,null=False)
