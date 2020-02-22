@@ -56,9 +56,11 @@ sched_2.start()  # 启动该脚本
 
 def example(request):
     news_list = []
-    news_list.append(spider.china_top_news())
-    context = {"news_list":news_list}
-    return render(request,'news.html', context)
+    #news_list.append(spider.china_top_news())
+    dfkxSpider.yqfk()
+    return HttpResponse('success')
+    # context = {"news_list":news_list}
+    # return render(request,'news.html', context)
 
 
 #########################根据用户id、department和用户记录返回新闻列表###############
@@ -123,10 +125,79 @@ def accord_user_id_get_news_list(user_id, department, channel, flag):
     # 当前频道为地方科协，并且用户department有地方科协，就就按照department，否则按时间检索
     elif channel == CHANNEL_DFKX:
         result_list = get_dfkx_news_list(department)
-    else:
+    elif channel == '战役防控':
+        result_list = get_zyfk_news()
+    else :
         result_list = []
     return result_list
 
+
+### 额外增加的战役防控查找
+def get_zyfk_news():
+    result_list = []
+    temp_dict ={}
+    #重要发布
+    temp_dict['重要发布'] = sorted(search_zyfk_news(source='重要发布'), key=itemgetter('priority', 'news_time'), reverse=True)
+
+    #科协要闻
+    temp_dict['科协要闻'] = sorted(search_zyfk_news(source='科协要闻'), key=itemgetter('priority', 'news_time'), reverse=True)
+    #两翼联动
+    temp_list =[]
+    temp_list.extend(sorted(search_zyfk_news(source='全国学会'), key=itemgetter('priority', 'news_time'), reverse=True))
+    temp_list.extend(sorted(search_zyfk_news(source='地方科协'), key=itemgetter('priority', 'news_time'), reverse=True))
+    temp_dict['两翼联动'] = temp_list
+    #应急科普
+    temp_dict['应急科普'] = sorted(search_zyfk_news(source='应急科普'), key=itemgetter('priority', 'news_time'), reverse=True)
+    #答疑解惑
+    temp_dict['答疑解惑'] = sorted(search_zyfk_news(source='答疑解惑'), key=itemgetter('priority', 'news_time'), reverse=True)
+    #抗疫榜样
+    temp_dict['抗疫榜样'] = sorted(search_zyfk_news(source='抗疫榜样'), key=itemgetter('priority', 'news_time'), reverse=True)
+    #媒体报道
+    temp_dict['媒体报道'] = sorted(search_zyfk_news(source='媒体报道'), key=itemgetter('priority', 'news_time'), reverse=True)
+    # banners轮播图
+    temp_dict['banners'] = search_zyfk_news(LB=True)
+
+    return temp_dict
+
+def search_zyfk_news(id__list=[],source=None,n = 3,LB =False):
+    result =[]
+    if LB:
+        try:
+            data = YQFK.objects.exclude(id__in=id__list).filter(~Q(img=None)).filter(~Q(img='')).filter(
+                ~Q(img=' ')).values_list('id', 'title', 'img', 'time',
+                                         'source', 'priority').order_by('-time')[:n]
+        except:
+            pass
+    else:
+        try:
+            data = YQFK.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).values_list('id',
+                                                                                                               'title',
+                                                                                                               'img',
+                                                                                                               'time',
+                                                                                                               'source',
+                                                                                                               'priority',
+                                                                                                               ).order_by(
+                '-time')[:n]
+        except Exception as err:
+            print("{0}数据库检索不到数据".format(YQFK._meta.db_table))
+            print(err)
+
+
+    if data:
+        for one in data:
+            temp_dict = {}
+            news_id = str(YQFK._meta.db_table) + '_' + str(one[0])
+            temp_dict['news_id'] = news_id
+            temp_dict['news_title'] = one[1]
+
+            # 在这里要进行img
+            temp_dict['news_img'] = CommonMethod.get_correct_img(one[2])
+            temp_dict['news_time'] = str(one[3])
+            temp_dict['news_source'] = one[4]
+            temp_dict['priority'] = one[5]
+            result.append(temp_dict)
+
+    return result
 
 # 个性化推荐算法
 def individual(user_id, channel, mymodel,LB=None):
