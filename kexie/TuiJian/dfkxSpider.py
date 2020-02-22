@@ -9,7 +9,7 @@ import json
 import requests
 import numpy as np
 
-from TuiJian.models import DFKX
+from TuiJian.models import DFKX, YQFK
 from . import spider
 
 
@@ -123,6 +123,420 @@ def s_complete_img_a(base_url, content):
     if img_path.startswith('data'):
         img_path = None
     return img_path
+
+########################临时增加一个疫情防控的爬虫####################
+def yq_complete_img_a(base_url, content):
+    imgs = content.findAll("img")
+    img_path = ''
+    if imgs:
+        for img in imgs:
+            img_path = img["src"]
+            if not img_path.startswith("http"):
+                img_path = base_url + img_path[2:]
+            img['src'] = img_path
+        img_path = imgs[0]['src']
+    try:
+        a_hrefs = content.findAll('a')
+    except Exception as err:
+        print('文章中没有a链接')
+        a_hrefs = None
+    if a_hrefs:
+        for a_href in a_hrefs:
+            try:
+                old_href = str(a_href["href"])
+            except Exception as err:
+                print('a标签没有href属性')
+                print(err)
+                continue
+            if old_href.startswith("http"):
+                new_href = old_href
+            else:
+                new_href = base_url + old_href[2:]
+            a_href['href'] = new_href
+    if img_path.startswith('data'):
+        img_path = None
+    return img_path
+
+# 地方科协的疫情
+def yq_dfkx():
+    temp_list = []
+    baseurl = "http://kxjjs.cast.org.cn/template"
+    urlh = "http://kxjjs.cast.org.cn/template/list/"
+    urlt = "list34.html"
+    urlh2 = "http://kxjjs.cast.org.cn/template/list/"
+    urlt2 = "list35.html"
+    # url = "http://kxjjs.cast.org.cn/template/list/1list34.html"
+    for i in range(1, 24):
+        url = urlh + str(i) + urlt
+        res = requests.get(url)
+        res.encoding = res.apparent_encoding
+        soup = BeautifulSoup(res.text, 'html.parser')
+        content = soup.find_all("div", class_="article_list")[0].select("a")
+        # print(content)
+        for ac in content:
+            temp_dict = {}
+            surl = baseurl + ac["href"][2:]
+            news_url = str(surl)
+            #print(temp_dict["url"])
+            try:
+                s = requests.get(surl)
+                s.encoding = s.apparent_encoding
+                ssoup = BeautifulSoup(s.text, 'html.parser')
+                news_title = str(ssoup.find_all("h6", class_="title")[0].text)
+                tcontent = ssoup.find_all("div", class_="l_txtscon")[0]
+                #temp_dict["label"] = "地方科协"
+                news_img = yq_complete_img_a(baseurl, tcontent)
+                # if not temp_dict["img"]:
+                #     news_img = None
+                news_content = str(tcontent)
+
+                temp_list.append(
+                    spider.package_data_dict(
+                        title=news_title, url=news_url, img=news_img,
+                        content=news_content, date=datetime.date.today(),
+                        source='地方科协', label=2))
+            except Exception as e:
+                print(e)
+    return temp_list
+
+# 全国学会的疫情
+def yq_qgxh():
+    temp_list = []
+    baseurl = "http://kxjjs.cast.org.cn/template"
+    urlh = "http://kxjjs.cast.org.cn/template/list/"
+    urlt = "list34.html"
+    urlh2 = "http://kxjjs.cast.org.cn/template/list/"
+    urlt2 = "list35.html"
+    # url = "http://kxjjs.cast.org.cn/template/list/1list34.html"
+    for i in range(1, 11):
+        url = urlh2 + str(i) + urlt2
+        res = requests.get(url)
+        res.encoding = res.apparent_encoding
+        soup = BeautifulSoup(res.text, 'html.parser')
+        content = soup.find_all("div", class_="article_list")[0].select("a")
+        for ac in content:
+            temp_dict = {}
+            surl = baseurl + ac["href"][2:]
+            news_url = str(surl)
+            #print(temp_dict["url"])
+            try:
+                s = requests.get(surl)
+                s.encoding = s.apparent_encoding
+                ssoup = BeautifulSoup(s.text, 'html.parser')
+                news_title = str(ssoup.find_all("h6", class_="title")[0].text)
+                print(news_title)
+                tcontent = ssoup.find_all("div", class_="l_txtscon")[0]
+                #temp_dict["label"] = "全国学会"
+                news_img = yq_complete_img_a(baseurl, tcontent)
+                # if not temp_dict["img"]:
+                #     temp_dict["img"] = None
+                news_content = str(tcontent)
+                #dict.append(temp_dict)
+                temp_list.append(
+                    spider.package_data_dict(
+                        title=news_title, url=news_url, img=news_img,
+                        content=news_content, date=datetime.date.today(),
+                        source='全国学会', label=2))
+            except Exception as e:
+                #print('333')
+                print(e)
+    return temp_list
+
+# 科协疫情
+def yq_kxyw():
+    temp_list = []
+    baseurl = "http://kxjjs.cast.org.cn/template"
+    urlh = "http://kxjjs.cast.org.cn/template/list/"
+    urlt = "list34.html"
+    urlh2 = "http://kxjjs.cast.org.cn/template/list/"
+    urlt2 = "list35.html"
+    urlh3 = "http://kxjjs.cast.org.cn/template/list/"
+    urlt3 = "list32.html"
+    for i in range(1, 3):
+        url = urlh3 + str(i) + urlt3
+        res = requests.get(url)
+        res.encoding = res.apparent_encoding
+        soup = BeautifulSoup(res.text, 'html.parser')
+        content = soup.find_all("div", class_="article_list")[0].select("a")
+        for ac in content:
+            temp_dict = {}
+            surl = baseurl + ac["href"][2:]
+            news_url = str(surl)
+            #print(temp_dict["url"])
+            try:
+                s = requests.get(surl)
+                s.encoding = s.apparent_encoding
+                ssoup = BeautifulSoup(s.text, 'html.parser')
+                news_title = str(ssoup.find_all("h6", class_="title")[0].text)
+                print(news_title)
+                tcontent = ssoup.find_all("div", class_="l_txtscon")[0]
+                #temp_dict["label"] = "科协要闻"
+                news_img = yq_complete_img_a(baseurl, tcontent)
+                # if not temp_dict["img"]:
+                #     temp_dict["img"] = None
+                news_content = str(tcontent)
+                #dict.append(temp_dict)
+                temp_list.append(
+                    spider.package_data_dict(
+                        title=news_title, url=news_url, img=news_img,
+                        content=news_content, date=datetime.date.today(),
+                        source='科协要闻', label=2))
+            except Exception as e:
+                print(e)
+    return temp_list
+
+# 重要发布
+def yq_zyfb():
+    temp_list=[]
+    baseurl = "http://kxjjs.cast.org.cn/template"
+    urldfkx = "http://kxjjs.cast.org.cn/template/list/1list34.html"
+    urlqgxh = "http://kxjjs.cast.org.cn/template/list/1list35.html"
+    urlkxyw = "http://kxjjs.cast.org.cn/template/list/1list32.html"
+    urlzyfb = "http://kxjjs.cast.org.cn/template/list/1list31.html"
+    urlkyby = "http://kxjjs.cast.org.cn/template/list/1list43.html"
+    urlmtbd = "http://kxjjs.cast.org.cn/template/list/1list44.html"
+    urlyjkp = "http://kxjjs.cast.org.cn/template/list/1list37.html"
+    urldyjh = "http://kxjjs.cast.org.cn/template/list/1list39.html"
+    # 重要发布
+    res = requests.get(urlzyfb)
+    res.encoding = res.apparent_encoding
+    soup = BeautifulSoup(res.text, 'html.parser')
+    content = soup.find_all("div", class_="article_list")[0].select("a")
+    for ac in content:
+        temp_dict = {}
+        surl = baseurl + ac["href"][2:]
+        news_url = str(surl)
+        #print(temp_dict["url"])
+        try:
+            s = requests.get(surl)
+            s.encoding = s.apparent_encoding
+            ssoup = BeautifulSoup(s.text, 'html.parser')
+            news_title = str(ssoup.find_all("h6", class_="title")[0].text)
+            print(news_title)
+            tcontent = ssoup.find_all("div", class_="l_txtscon")[0]
+            #temp_dict["label"] = "重要发布"
+            news_img = yq_complete_img_a(baseurl, tcontent)
+            # if not temp_dict["img"]:
+            #     temp_dict["img"] = None
+            news_content = str(tcontent)
+            #dict.append(temp_dict)
+            temp_list.append(
+                spider.package_data_dict(
+                    title=news_title, url=news_url, img=news_img,
+                    content=news_content, date=datetime.date.today(),
+                    source='重要发布', label=2))
+        except Exception as e:
+            print(e)
+    return temp_list
+#抗疫榜样
+def yq_kyby():
+    temp_list=[]
+    baseurl = "http://kxjjs.cast.org.cn/template"
+    urldfkx = "http://kxjjs.cast.org.cn/template/list/1list34.html"
+    urlqgxh = "http://kxjjs.cast.org.cn/template/list/1list35.html"
+    urlkxyw = "http://kxjjs.cast.org.cn/template/list/1list32.html"
+    urlzyfb = "http://kxjjs.cast.org.cn/template/list/1list31.html"
+    urlkyby = "http://kxjjs.cast.org.cn/template/list/1list43.html"
+    urlmtbd = "http://kxjjs.cast.org.cn/template/list/1list44.html"
+    urlyjkp = "http://kxjjs.cast.org.cn/template/list/1list37.html"
+    urldyjh = "http://kxjjs.cast.org.cn/template/list/1list39.html"
+    res = requests.get(urlkyby)
+    res.encoding = res.apparent_encoding
+    soup = BeautifulSoup(res.text, 'html.parser')
+    content = soup.find_all("div", class_="article_list")[0].select("a")
+    for ac in content:
+        temp_dict = {}
+        surl = baseurl + ac["href"][2:]
+        news_url = str(surl)
+        #print(temp_dict["url"])
+        try:
+            s = requests.get(surl)
+            s.encoding = s.apparent_encoding
+            ssoup = BeautifulSoup(s.text, 'html.parser')
+            news_title = str(ssoup.find_all("h6", class_="title")[0].text)
+            print(news_title)
+            tcontent = ssoup.find_all("div", class_="l_txtscon")[0]
+            #temp_dict["label"] = "抗疫榜样"
+            news_img = yq_complete_img_a(baseurl, tcontent)
+            # if not temp_dict["img"]:
+            #     temp_dict["img"] = None
+            news_content = str(tcontent)
+            #dict.append(temp_dict)
+            temp_list.append(
+                spider.package_data_dict(
+                    title=news_title, url=news_url, img=news_img,
+                    content=news_content, date=datetime.date.today(),
+                    source='抗疫榜样', label=2))
+        except Exception as e:
+            print(e)
+    return temp_list
+#媒体报道
+def yq_mtbd():
+    # 媒体报道
+    temp_list=[]
+    baseurl = "http://kxjjs.cast.org.cn/template"
+    urldfkx = "http://kxjjs.cast.org.cn/template/list/1list34.html"
+    urlqgxh = "http://kxjjs.cast.org.cn/template/list/1list35.html"
+    urlkxyw = "http://kxjjs.cast.org.cn/template/list/1list32.html"
+    urlzyfb = "http://kxjjs.cast.org.cn/template/list/1list31.html"
+    urlkyby = "http://kxjjs.cast.org.cn/template/list/1list43.html"
+    urlmtbd = "http://kxjjs.cast.org.cn/template/list/1list44.html"
+    urlyjkp = "http://kxjjs.cast.org.cn/template/list/1list37.html"
+    urldyjh = "http://kxjjs.cast.org.cn/template/list/1list39.html"
+    res = requests.get(urlmtbd)
+    res.encoding = res.apparent_encoding
+    soup = BeautifulSoup(res.text, 'html.parser')
+    content = soup.find_all("div", class_="article_list")[0].select("a")
+    for ac in content:
+        temp_dict = {}
+        surl = baseurl + ac["href"][2:]
+        news_url = str(surl)
+        #print(temp_dict["url"])
+        try:
+            s = requests.get(surl)
+            s.encoding = s.apparent_encoding
+            ssoup = BeautifulSoup(s.text, 'html.parser')
+            news_title = str(ssoup.find_all("h6", class_="title")[0].text)
+            print(news_title)
+            tcontent = ssoup.find_all("div", class_="l_txtscon")[0]
+            #temp_dict["label"] = "媒体报道"
+            news_img = yq_complete_img_a(baseurl, tcontent)
+            # if not temp_dict["img"]:
+            #     temp_dict["img"] = None
+            news_content = str(tcontent)
+            #dict.append(temp_dict)
+            temp_list.append(
+                spider.package_data_dict(
+                    title=news_title, url=news_url, img=news_img,
+                    content=news_content, date=datetime.date.today(),
+                    source='媒体报道', label=2))
+        except Exception as e:
+            print(e)
+    return temp_list
+
+# 应急科普
+def yq_yjkp():
+    # 应急科普
+    temp_list=[]
+    baseurl = "http://kxjjs.cast.org.cn/template"
+    urldfkx = "http://kxjjs.cast.org.cn/template/list/1list34.html"
+    urlqgxh = "http://kxjjs.cast.org.cn/template/list/1list35.html"
+    urlkxyw = "http://kxjjs.cast.org.cn/template/list/1list32.html"
+    urlzyfb = "http://kxjjs.cast.org.cn/template/list/1list31.html"
+    urlkyby = "http://kxjjs.cast.org.cn/template/list/1list43.html"
+    urlmtbd = "http://kxjjs.cast.org.cn/template/list/1list44.html"
+    urlyjkp = "http://kxjjs.cast.org.cn/template/list/1list37.html"
+    urldyjh = "http://kxjjs.cast.org.cn/template/list/1list39.html"
+    res = requests.get(urlyjkp)
+    res.encoding = res.apparent_encoding
+    soup = BeautifulSoup(res.text, 'html.parser')
+    content = soup.find_all("div", class_="article_list")[0].select("a")
+    for ac in content:
+        temp_dict = {}
+        surl = baseurl + ac["href"][2:]
+        news_url = str(surl)
+        #print(temp_dict["url"])
+        try:
+            s = requests.get(surl)
+            s.encoding = s.apparent_encoding
+            ssoup = BeautifulSoup(s.text, 'html.parser')
+            news_title = str(ssoup.find_all("h6", class_="title")[0].text)
+            print(news_title)
+            tcontent = ssoup.find_all("div", class_="l_txtscon")[0]
+            #temp_dict["label"] = "应急科普"
+            news_img = yq_complete_img_a(baseurl, tcontent)
+            # if not temp_dict["img"]:
+            #     temp_dict["img"] = None
+            news_content = str(tcontent)
+            #dict.append(temp_dict)
+            temp_list.append(
+                spider.package_data_dict(
+                    title=news_title, url=news_url, img=news_img,
+                    content=news_content, date=datetime.date.today(),
+                    source='应急科普', label=2))
+        except Exception as e:
+            print(e)
+    return temp_list
+# 答疑解惑
+def yq_dyjh():
+    temp_list=[]
+    baseurl = "http://kxjjs.cast.org.cn/template"
+    urldfkx = "http://kxjjs.cast.org.cn/template/list/1list34.html"
+    urlqgxh = "http://kxjjs.cast.org.cn/template/list/1list35.html"
+    urlkxyw = "http://kxjjs.cast.org.cn/template/list/1list32.html"
+    urlzyfb = "http://kxjjs.cast.org.cn/template/list/1list31.html"
+    urlkyby = "http://kxjjs.cast.org.cn/template/list/1list43.html"
+    urlmtbd = "http://kxjjs.cast.org.cn/template/list/1list44.html"
+    urlyjkp = "http://kxjjs.cast.org.cn/template/list/1list37.html"
+    urldyjh = "http://kxjjs.cast.org.cn/template/list/1list39.html"
+    res = requests.get(urldyjh)
+    res.encoding = res.apparent_encoding
+    soup = BeautifulSoup(res.text, 'html.parser')
+    content = soup.find_all("div", class_="article_list")[0].select("a")
+    for ac in content:
+        temp_dict = {}
+        surl = baseurl + ac["href"][2:]
+        news_url = str(surl)
+        #print(temp_dict["url"])
+        try:
+            s = requests.get(surl)
+            s.encoding = s.apparent_encoding
+            ssoup = BeautifulSoup(s.text, 'html.parser')
+            news_title = str(ssoup.find_all("h6", class_="title")[0].text)
+            print(news_title)
+            tcontent = ssoup.find_all("div", class_="l_txtscon")[0]
+            #temp_dict["label"] = "答疑解惑"
+            news_img = yq_complete_img_a(baseurl, tcontent)
+            # if not temp_dict["img"]:
+            #     temp_dict["img"] = None
+            news_content = str(tcontent)
+            #dict.append(temp_dict)
+            temp_list.append(
+                spider.package_data_dict(
+                    title=news_title, url=news_url, img=news_img,
+                    content=news_content, date=datetime.date.today(),
+                    source='答疑解惑', label=2))
+        except Exception as e:
+            print(e)
+    return temp_list
+def yqfk_data_into_mysql(news_list):
+    if news_list:
+        for one_news in news_list:
+            news = YQFK(**one_news)
+            try:
+                news.save()
+                print('Successful')
+            except Exception as e:
+                #pass
+                print(e)
+
+def yqfk():
+    try:
+        #地方
+        #yq_insert_data(yq_dfkx())
+        # 学会
+        #yq_insert_data(yq_qgxh())
+        #科协
+        yq_insert_data(yq_kxyw())
+        #重要发布
+        yq_insert_data(yq_zyfb())
+        #榜样
+        yq_insert_data(yq_kyby())
+        #媒体
+        yq_insert_data(yq_mtbd())
+        #科普
+        yq_insert_data(yq_yjkp())
+        #答疑
+        yq_insert_data(yq_dyjh())
+    except Exception as e:
+        print(e)
+        print('错误')
+def yq_insert_data(news_list):
+    try:
+        yqfk_data_into_mysql(news_list)
+    except:
+        pass
+
 
 
 ########################北京科协####################################
@@ -2476,72 +2890,76 @@ def spider_data_into_mysql(news_list):
                 #pass
                 print(e)
 
-
+def news_insert_data(news_list):
+    try:
+        spider_data_into_mysql(news_list)
+    except:
+        pass
 def start_dfkx_spider():
     try:
         #安徽  测试完毕
-        spider_data_into_mysql(get_ahkx())
+        news_insert_data(get_ahkx())
         #福建  测试完毕
-        spider_data_into_mysql(get_fjkx())
+        news_insert_data(get_fjkx())
         #甘肃   测试完毕
-        spider_data_into_mysql(get_gskx())
+        news_insert_data(get_gskx())
         #广东   测试完毕
-        spider_data_into_mysql(get_gdkx())
+        news_insert_data(get_gdkx())
         #广西  测试完毕
-        spider_data_into_mysql(get_gxkx())
+        news_insert_data(get_gxkx())
         #贵州  测试完毕
-        spider_data_into_mysql(get_gzkx())
+        news_insert_data(get_gzkx())
         #海南  测试完毕
-        spider_data_into_mysql(get_hnkx())
+        news_insert_data(get_hnkx())
         #河北  测试完毕
-        spider_data_into_mysql(get_hbkx())
+        news_insert_data(get_hbkx())
         #河南   测试完毕
-        spider_data_into_mysql(get_henankx())
+        news_insert_data(get_henankx())
         #黑龙江  测试完毕
-        spider_data_into_mysql(get_hljkx())
+        news_insert_data(get_hljkx())
         #湖北   测试完毕
-        spider_data_into_mysql(get_hubeikx())
+        news_insert_data(get_hubeikx())
         #湖南   测试完毕
-        spider_data_into_mysql(get_hunankx())
+        news_insert_data(get_hunankx())
         #吉林   测试完毕
         spider_data_into_mysql(get_jlkx())
         #江苏 测试完毕
-        spider_data_into_mysql(get_jskx())
+        news_insert_data(get_jskx())
         #江西 数据库有
-        spider_data_into_mysql(get_jxkx())
+        news_insert_data(get_jxkx())
         #辽宁  数据库有
-        spider_data_into_mysql(get_lnkx())
+        news_insert_data(get_lnkx())
         #内蒙古 数据库有
-        spider_data_into_mysql(get_nmgkx())
+        news_insert_data(get_nmgkx())
         #宁夏 数据库有
-        spider_data_into_mysql(get_nxkx())
+        news_insert_data(get_nxkx())
         #青海  出错  数据库无
-        spider_data_into_mysql(get_qhkx())
+        news_insert_data(get_qhkx())
         # 山东  出错  数据库无
-        spider_data_into_mysql(get_sdkx())
+        news_insert_data(get_sdkx())
         # 山西 出错  数据库无
-        spider_data_into_mysql(get_sxkx())
+        news_insert_data(get_sxkx())
         #陕西 出错  地址错误
-        spider_data_into_mysql(get_shanxikx())
+        news_insert_data(get_shanxikx())
         #上海 出错  异常出错
-        spider_data_into_mysql(get_shkx())
+        news_insert_data(get_shkx())
         #四川 出错  数据库无
-        spider_data_into_mysql(get_sckx())
+        news_insert_data(get_sckx())
         #天津  出错
-        spider_data_into_mysql(get_tjkx())
+        news_insert_data(get_tjkx())
         # #西藏 出错
-        spider_data_into_mysql(get_xzkx())
+        news_insert_data(get_xzkx())
         #新疆 维吾尔  出错
-        spider_data_into_mysql(get_xjkx())
+        news_insert_data(get_xjkx())
         #新疆兵团  出错
-        spider_data_into_mysql(get_xjbtkx())
+        news_insert_data(get_xjbtkx())
         #云南科协  出错
-        spider_data_into_mysql(get_ynkx())
+        news_insert_data(get_ynkx())
         #浙江  出错
-        spider_data_into_mysql(get_zjkx())
+        news_insert_data(get_zjkx())
         #重庆 出错
-        spider_data_into_mysql(get_cqkx())
+        news_insert_data(get_cqkx())
         # 北京科协
-        spider_data_into_mysql(get_bjkx())
+        news_insert_data(get_bjkx())
     except Exception as e:
         print(e)
