@@ -37,6 +37,8 @@ def mytask_1():
     updata_get_rmw_news_data()
     # 人民网科技
     update_get_rmw_kj_data()
+    #疫情防控
+    dfkxSpider.yqfk()
     print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
 
 

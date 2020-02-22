@@ -513,9 +513,9 @@ def yqfk_data_into_mysql(news_list):
 def yqfk():
     try:
         #地方
-        #yq_insert_data(yq_dfkx())
+        yq_insert_data(yq_dfkx())
         # 学会
-        #yq_insert_data(yq_qgxh())
+        yq_insert_data(yq_qgxh())
         #科协
         yq_insert_data(yq_kxyw())
         #重要发布
