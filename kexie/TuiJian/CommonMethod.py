@@ -60,6 +60,8 @@ def table_to_models(db_table):
         mymodels = TECH
     elif ChinaTopNews._meta.db_table == db_table:
         mymodels = ChinaTopNews
+    elif YQFK._meta.db_table == db_table:
+        mymodels = YQFK
     return mymodels
 # 根据新闻id获取到数据表和在表中的id
 def get_table_and_id(news_id):
