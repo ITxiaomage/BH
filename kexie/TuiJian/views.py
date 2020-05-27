@@ -23,7 +23,7 @@ sched_2 = Scheduler()  # 实例化，固定格式
 
 
 #  五个小时更新一次
-@sched_1.interval_schedule(hours=12)
+@sched_1.interval_schedule(hours=5)
 def mytask_1():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # 科协一家
@@ -43,7 +43,7 @@ def mytask_1():
 
 
 #  每天更新一次
-@sched_2.interval_schedule(hours=24)
+@sched_2.interval_schedule(hours=12)
 def mytask__2():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # # cast数据库
