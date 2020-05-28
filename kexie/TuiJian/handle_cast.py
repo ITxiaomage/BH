@@ -286,6 +286,7 @@ def handle_wechat_xuehui( data, table,cursor):
                 #来源错误就扔掉
                 if not AgencyQgxh.objects.filter(department=source)[0]:
                     continue
+                print('handle_wechat_xuehui' + str(source))
                 #处理日期
                 if date != '空':
                     date = date.split(' ')[0]
@@ -382,6 +383,7 @@ def package_data_dict(title=None, url=None, img =None,content=None, date=None, s
         if tag == 2:
             try:
                 source = AgencyQgxh.objects.filter(department=source)[0]
+                print('package_data_dict' + str(source))
             except Exception as err:
                 #print(err)
                 source = None
