@@ -182,6 +182,9 @@ def handle_website_xuehui( data, table,cursor):
                 # 没有content就不要了
                 if not content or content == "空"  or title == "空" or source == "空":
                     continue
+                # 来源错误就扔掉
+                if not AgencyQgxh.objects.filter(department=source)[0]:
+                    continue
                 #处理日期
                 try:
                     if date != '空':
@@ -279,6 +282,9 @@ def handle_wechat_xuehui( data, table,cursor):
                 title, link, content, date, source = one_news[1], one_news[2], one_news[5], one_news[3], one_news[4]
                 # 没有content就不要了
                 if not content or content == "空":
+                    continue
+                #来源错误就扔掉
+                if not AgencyQgxh.objects.filter(department=source)[0]:
                     continue
                 #处理日期
                 if date != '空':
