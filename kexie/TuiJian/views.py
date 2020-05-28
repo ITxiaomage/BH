@@ -59,7 +59,8 @@ sched_2.start()  # 启动该脚本
 def example(request):
     news_list = []
     #news_list.append(spider.china_top_news())
-    dfkxSpider.yqfk()
+    #dfkxSpider.yqfk()
+    hanle_cast_into_mysql()
     return HttpResponse('success')
     # context = {"news_list":news_list}
     # return render(request,'news.html', context)
@@ -907,8 +908,8 @@ def hanle_cast_into_mysql():
     try:
         handle_cast.start()
     except Exception as err:
-        pass
-        #print('清洗cast数据库入库出错')
+        #pass
+        print('清洗cast数据库入库出错')
         #print(err)
     # try:
     #     handle_cast.sz_kj()
