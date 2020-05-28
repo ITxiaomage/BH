@@ -74,11 +74,12 @@ def start():
     # save_data_to_mysql(data,TECH)
     #print('开始处理website数据库的新闻')
     # 处理website
+        print('开始处理website')
         cast_table = 'website'
         data = handle_website_xuehui(xuehui(), cast_table, cast_cursor)
     # 保存数据到数据库
         save_data_to_mysql(data,QGXH)
-
+        print('website结束')
     #在处理地方科协的数据
         # data = handle_website_shenghui(shenghui(),cast_table,cast_cursor)
         # save_data_to_mysql(data,DFKX)
@@ -92,7 +93,7 @@ def start():
     #处理wechat
     # 全国学会
         cast_table = 'wechat'
-
+        print('开始处理wechat')
     # 先处理学会的数据
         data = handle_wechat_xuehui(xuehui(), cast_table, cast_cursor)
         save_data_to_mysql(data, QGXH)
@@ -185,6 +186,7 @@ def handle_website_xuehui( data, table,cursor):
                 # 来源错误就扔掉
                 if not AgencyQgxh.objects.filter(department=source)[0]:
                     continue
+                print('handle_website_xuehui' + str(source))
                 #处理日期
                 try:
                     if date != '空':
@@ -363,6 +365,7 @@ def handle_wechat_list(data, table,cursor):
     return result_list
 #tag = 1 代表的是地方科协，tag =2 代表的是全国学会
 def package_data_dict(title=None, url=None, img =None,content=None, date=None, source=None,tag = None):
+    print('tag' + str(tag) + 'source' + str(source) + 'date' + str(date))
     temp_dict = {}
     keywords = TF_IDF(content,MAX_KEYWORDS)
     if len(keywords) > 4:
