@@ -184,7 +184,10 @@ def handle_website_xuehui( data, table,cursor):
                     continue
                 #处理日期
                 try:
-                    datetime.datetime.strptime(date, "%Y-%m-%d")
+                    if date != '空':
+                        date = date.split(' ')[0]
+                    else:
+                        date = datetime.datetime.now().strftime('%Y-%m-%d')
                 except:
                     date = datetime.datetime.now().strftime('%Y-%m-%d')
                 #数据封装进字典
