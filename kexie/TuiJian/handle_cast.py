@@ -186,7 +186,7 @@ def handle_website_xuehui( data, table,cursor):
                 # 来源错误就扔掉
                 if not AgencyQgxh.objects.filter(department=source)[0]:
                     continue
-                print('handle_website_xuehui' + str(source))
+                print('handle_website_xuehui' + str(AgencyQgxh.objects.filter(department=source)[0]))
                 #处理日期
                 try:
                     if date != '空':
@@ -288,6 +288,7 @@ def handle_wechat_xuehui( data, table,cursor):
                 #来源错误就扔掉
                 if not AgencyQgxh.objects.filter(department=source)[0]:
                     continue
+                print('handle_wechat_xuehui' + str(AgencyQgxh.objects.filter(department=source)[0]))
                 #处理日期
                 if date != '空':
                     date = date.split(' ')[0]
@@ -366,6 +367,7 @@ def handle_wechat_list(data, table,cursor):
 def package_data_dict(title=None, url=None, img =None,content=None, date=None, source=None,tag = None):
     temp_dict = {}
     keywords = TF_IDF(content,MAX_KEYWORDS)
+    print('keywords' + str(len(keywords)))
     if len(keywords) > 4:
         temp_dict['title'] = title
         temp_dict['url'] = url
