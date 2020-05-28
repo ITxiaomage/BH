@@ -122,8 +122,8 @@ def start():
 
     #增加一点时政新闻
     #sz_kj()
-    except:
-        pass
+    except Exception as e:
+        print(e)
     finally:
         close(cast_db, cast_cursor)
 
@@ -135,8 +135,8 @@ def save_data_to_mysql(data,myModel):
         try:
             news.save()
         except Exception as e:
-            pass
-            #print(e)
+            #pass
+            print(e)
 
 
 ####################################处理media_content##############################
@@ -193,9 +193,9 @@ def handle_website_xuehui( data, table,cursor):
                 #数据封装进字典
                 result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=source,tag = 2))
 
-        except :
-            pass
-            #print('出现错误')
+        except  Exception as e:
+            #pass
+            print('数据库清洗' + str(e))
     #print(result_list)
     return result_list
 
