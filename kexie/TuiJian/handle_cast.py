@@ -288,7 +288,6 @@ def handle_wechat_xuehui( data, table,cursor):
                 #来源错误就扔掉
                 if not AgencyQgxh.objects.filter(department=source)[0]:
                     continue
-                print('handle_wechat_xuehui' + str(source))
                 #处理日期
                 if date != '空':
                     date = date.split(' ')[0]
@@ -365,7 +364,6 @@ def handle_wechat_list(data, table,cursor):
     return result_list
 #tag = 1 代表的是地方科协，tag =2 代表的是全国学会
 def package_data_dict(title=None, url=None, img =None,content=None, date=None, source=None,tag = None):
-    print('tag' + str(tag) + 'source' + str(source) + 'date' + str(date))
     temp_dict = {}
     keywords = TF_IDF(content,MAX_KEYWORDS)
     if len(keywords) > 4:
@@ -388,7 +386,7 @@ def package_data_dict(title=None, url=None, img =None,content=None, date=None, s
                 source = AgencyQgxh.objects.filter(department=source)[0]
                 print('package_data_dict' + str(source))
             except Exception as err:
-                #print(err)
+                print("全国学会来源错误" + str(err))
                 source = None
                 #print('全国学会来源错误')
         temp_dict['source'] = source
