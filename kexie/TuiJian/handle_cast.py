@@ -179,7 +179,7 @@ def handle_website_xuehui( data, table,cursor):
             cursor.execute(sql)
             all_news = cursor.fetchall()
             for one_news in all_news:
-                title, link, content, date, source = one_news[5], one_news[7], one_news[10], one_news[3], one_news[0]
+                title, link, content, date, source = one_news[10], one_news[3], one_news[8], one_news[6], one_news[0]
                 # 没有content就不要了
                 if not content or content == "空"  or title == "空" or source == "空":
                     continue
@@ -194,7 +194,7 @@ def handle_website_xuehui( data, table,cursor):
                         date = datetime.datetime.now().strftime('%Y-%m-%d')
                 except:
                     date = datetime.datetime.now().strftime('%Y-%m-%d')
-                #数据封装进字典
+                #数据封装进字典 这里应该改为打好包装就直接插入数据库比较好，
                 result_list.append(package_data_dict(title=title, url=link, content=content,date=date, source=source,tag = 2))
 
         except  Exception as e:
@@ -280,7 +280,7 @@ def handle_wechat_xuehui( data, table,cursor):
             cursor.execute(sql)
             all_news = cursor.fetchall()
             for one_news in all_news:
-                title, link, content, date, source = one_news[1], one_news[2], one_news[5], one_news[3], one_news[4]
+                title, link, content, date, source = one_news[9], one_news[2], one_news[1], one_news[3], one_news[4]
                 # 没有content就不要了
                 if not content or content == "空":
                     continue
