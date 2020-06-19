@@ -1049,7 +1049,7 @@ def get_hbkx_news(label, url, base_url=r'http://www.hbast.org.cn'):
         for one_news in news_list:
             if (one_news.find_elements_by_tag_name("a")):
                 news_title = str(one_news.find_elements_by_tag_name("a")[0].text)
-                print(news_title)
+                #print(news_title)
                 news_url = str(one_news.find_elements_by_tag_name("a")[0].get_attribute("href"))
                 news_label = str(label)
                 try:
@@ -1075,12 +1075,14 @@ def get_hbkx_news(label, url, base_url=r'http://www.hbast.org.cn'):
                             content=news_content, date=news_time,
                             source='河北省科学技术协会', label=news_label, tag=1))
                 except Exception as e:
-                    print(e)
+                    pass
+                    #print(e)
                 finally:
                     ssoup.quit()
 
     except Exception as e:
-        print(e)
+        #print(e)
+        pass
     finally:
         soup.quit()
         return temp_list
@@ -1464,7 +1466,7 @@ def get_jlkx_news(label, url, base_url=r'http://www.jlstnet.net'):
     news_list = soup["data"]
     for one_news in news_list:
         news_title = str(one_news["title"])
-        print(news_title)
+        #print(news_title)
         news_url = str(one_news["id"])
         news_url = str("http://www.jlstnet.net/newsdetails.html?newsid=" + news_url)
         news_time = str(one_news["timeymd"])
@@ -1515,7 +1517,7 @@ def get_jskx_news(label, url, base_url=r'http://www.jskx.org.cn'):
     for one_news in news_list:
         if one_news.select("tr>td>a"):
             news_title = str(one_news.select("tr>td>a")[0]["title"])
-            print(news_title)
+            #print(news_title)
             news_url = str(one_news.select("tr>td>a")[0]["href"])
             # news_url = str(base_url + news_url)
             news_time = str(one_news.select("tr>td")[2].text)
@@ -1555,7 +1557,7 @@ def get_jskx_nnnnews(label, url, base_url=r'http://www.jskx.org.cn/'):
     for one_news in news_list:
         if one_news.select("tbody>tr"):
             news_title = str(one_news.select("table>tbody>tr>td>a")[0]["title"])
-            print(news_title)
+            #print(news_title)
             news_url = str(one_news.select("table>tbody>tr>td>a")[0]["href"])
             news_time = str(one_news.select("table>tbody>tr>td")[2].text)
             news_label = str(label)
@@ -1588,7 +1590,7 @@ def get_jskx_nnews(label, url, base_url=r'http://www.jsxhw.org'):
     for one_news in news_list:
         if one_news.select("tr>td>a"):
             news_title = one_news.select("tr>td>a")[0].text
-            print(news_title)
+            #print(news_title)
             # print(news_title)
             news_url = one_news.select("tr>td>a")[0]["href"]
             # print(news_url)
@@ -1625,7 +1627,7 @@ def get_jskx_nnnews(label, url, base_url=r'http://www.jsxhw.org'):
     for one_news in news_list:
         if one_news.select("tr>td>span>span"):
             news_title = str(one_news.select("tr>td>span>span")[0].select("a")[0].text)
-            print(news_title)
+            #print(news_title)
             # print(news_title)
             news_url = one_news.select("tr>td>span>span>a")[0]["href"]
             # news_url = one_news.select(("tr>td>span>a")[0]["href"])
@@ -2368,7 +2370,7 @@ def get_sckx_news(label, url, base_url=r'http://www.sckx.org.cn'):
         return temp_list
     try:
         news_list = soup.find_all("div", class_="center-content")[0].select("div")
-        print(len(news_list))
+        #print(len(news_list))
     except:
         news_list = []
     for one_news in news_list:
@@ -2461,12 +2463,12 @@ def get_tjkx_news(label, url, base_url=r'http://www.tast.org.cn'):
     try:
         # print(soup)
         news_list = soup.find_all("td", class_="weiruan16 hanggao35")[0].select("tr")
-        print(len(news_list))
+        #print(len(news_list))
     except:
         news_list = []
     for one_news in news_list:
         news_title = one_news.select("td")[1].select("a")[0].text
-        print(news_title)
+        #print(news_title)
         news_url = one_news.select("td")[1].select("a")[0]["href"]
         # news_url = str(base_url + news_url)
         news_time = str(one_news.select("td")[2].text)
@@ -2478,7 +2480,7 @@ def get_tjkx_news(label, url, base_url=r'http://www.tast.org.cn'):
         news_zoom = ssoup.find_all("td", class_="weiruan16 hanggao35")[0]
         # bs = BeautifulSoup(news_zoom.get_attribute("outerHTML"), 'lxml')
         news_img = complete_img_a(base_url, news_zoom)
-        print(news_img)
+        #print(news_img)
         if not news_img: news_img = None
         news_content = str(news_zoom)
         # dict = dict_list(news_title, news_url, news_img, news_content, news_time, news_label)
@@ -2885,10 +2887,10 @@ def spider_data_into_mysql(news_list):
             news = DFKX(**one_news)
             try:
                 news.save()
-                print('Successful')
+                #print('Successful')
             except Exception as e:
-                #pass
-                print(e)
+                pass
+                #print(e)
 
 def news_insert_data(news_list):
     try:
@@ -2962,4 +2964,5 @@ def start_dfkx_spider():
         # 北京科协
         news_insert_data(get_bjkx())
     except Exception as e:
-        print(e)
+        pass
+        #print(e)

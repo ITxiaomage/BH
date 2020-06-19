@@ -365,7 +365,7 @@ def handle_wechat_list(data, table,cursor):
 def package_data_dict(title=None, url=None, img =None,content=None, date=None, source=None,tag = None):
     temp_dict = {}
     keywords = TF_IDF(content,MAX_KEYWORDS)
-    print(keywords)
+    #print(keywords)
     if len(keywords) > 0:
         temp_dict['title'] = title
         temp_dict['url'] = url

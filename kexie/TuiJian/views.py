@@ -38,7 +38,7 @@ def mytask_1():
     # 人民网科技
     update_get_rmw_kj_data()
     #疫情防控
-    dfkxSpider.yqfk()
+    #dfkxSpider.yqfk()
     print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
 
 
@@ -60,7 +60,17 @@ def example(request):
     news_list = []
     #news_list.append(spider.china_top_news())
     #dfkxSpider.yqfk()
-    hanle_cast_into_mysql()
+    #hanle_cast_into_mysql()
+    # 科协一家
+    update_kxyj_data()
+    # 中央新闻
+    update_china_top_news()
+    # 科协官网
+    update_kexie_news_into_mysql()
+    # 人名网时政
+    updata_get_rmw_news_data()
+    # 人民网科技
+    update_get_rmw_kj_data()
     return HttpResponse('success')
     # context = {"news_list":news_list}
     # return render(request,'news.html', context)

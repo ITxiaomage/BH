@@ -74,8 +74,9 @@ def get_rmw_news_data(url=r'http://www.people.com.cn/rss/rect_default.json', bas
                 news_source=None,
                 base_url=base_url))
         except Exception as err:
-            print('爬取人民网时政新闻出错{0}'.format(one_news))
-            print(err)
+            pass
+            #print('爬取人民网时政新闻出错{0}'.format(one_news))
+            #print(err)
     return result_list
 
 
@@ -116,7 +117,7 @@ def rm_spider_head(url):
         response.encoding = response.apparent_encoding
         soup = BeautifulSoup(response.text, 'lxml')
     except Exception as err:
-        print('rm_spider_head出错')
+        #print('rm_spider_head出错')
         soup = None
     return soup
 
@@ -213,7 +214,7 @@ def get_rmw_data_dict(news_url=None, news_content=None, news_title=None, news_im
         except:
             news_img = ''
     except Exception as err:
-        print('爬取新闻{0}出错'.format(news_url))
+        #print('爬取新闻{0}出错'.format(news_url))
         pass
     # del content['style']
     # 处理完content中图片的style
@@ -252,40 +253,46 @@ def update_kexie_news():
             # 头条
             result_list.extend(get_kx_data(browser, tt_url, base_url, 1))
         except Exception as err:
-            print('头条新闻出错')
+            #print('头条新闻出错')
             # print(err)
+            pass
         try:
             # 要闻
             result_list.extend(get_kx_data(browser, yw_url, base_url, 1))
         except Exception as err:
-            print('要闻出错')
+            #print('要闻出错')
+            pass
             # print(err)
         try:
             # 通知
             result_list.extend(get_kx_data(browser, tzgc_url, base_url, 3))
         except Exception as err:
-            print('通知出错')
+            #print('通知出错')
+            pass
             # print(err)
             pass
         try:
             # 学术学会
             result_list.extend(get_kx_data(browser, tzxsxh, base_url, 3))
         except Exception as err:
-            print('通知出错')
+            #print('通知出错')
+            pass
             # print(err)
             pass
         try:
             # 科学普及
             result_list.extend(get_kx_data(browser, tzkxpj, base_url, 3))
         except Exception as err:
-            print('通知出错')
+            #print('通知出错')
+            pass
             # print(err)
             pass
         try:
             # 组织普及
             result_list.extend(get_kx_data(browser, zzpj, base_url, 3))
         except Exception as err:
-            print('通知出错')
+            #print('通知出错')
+            pass
             # print(err)
             pass
 
@@ -293,7 +300,8 @@ def update_kexie_news():
             # 科协党建
             result_list.extend(get_kx_data(browser, kxdj, base_url, 3))
         except Exception as err:
-            print('通知出错')
+            #print('通知出错')
+            pass
             # print(err)
             pass
 
@@ -301,7 +309,8 @@ def update_kexie_news():
             # 计划财务
             result_list.extend(get_kx_data(browser, jhcw, base_url, 3))
         except Exception as err:
-            print('通知出错')
+            #print('通知出错')
+            pass
             # print(err)
             pass
 
@@ -309,7 +318,8 @@ def update_kexie_news():
             # 调研选春dwjl
             result_list.extend(get_kx_data(browser, dyxc, base_url, 3))
         except Exception as err:
-            print('通知出错')
+            #print('通知出错')
+            pass
             # print(err)
             pass
 
@@ -317,22 +327,26 @@ def update_kexie_news():
             # 对外交流
             result_list.extend(get_kx_data(browser, dwjl, base_url, 3))
         except Exception as err:
-            print('通知出错')
+            #print('通知出错')
+            pass
             # print(err)
             pass
 
         try:
             result_list.extend(get_kx_video_data(browser, xhfc_url, base_url, 4))
         except Exception as err:
-            print('协会风采出错')
+            #print('协会风采出错')
+            pass
             # print(err)
         try:
             result_list.extend(get_kx_video_data(browser, cmkx_url, base_url, 4))
         except Exception as err:
-            print('传媒风采')
+            #print('传媒风采')
+            pass
             # print(err)
     except Exception as err:
-        print('爬取科协新闻出错')
+        #print('爬取科协新闻出错')
+        pass
         # print(err)
     finally:
         browser.quit()
@@ -362,13 +376,13 @@ def get_video_content(browser, url, xpath):
     try:
         content = browser.find_element_by_xpath(xpath).get_attribute('src')
     except:
-        print('获取内容错误。。。或者无内容')
+        #print('获取内容错误。。。或者无内容')
         content = ''
     try:
         video_time = browser.find_element_by_xpath('//div[@class="center"]//div[@class=" time"]//span').text
         video_time = video_time.strip().split('：')[-1]
     except Exception as err:
-        print(err)
+        #print(err)
         video_time = str(datetime.datetime.now().strftime('%Y-%m-%d'))
     browser.execute_script('window.close()')
     browser.switch_to_window(browser.window_handles[0])
@@ -427,7 +441,7 @@ def get_kx_data(browser, url, base_url, label):
         info_list_len = len(info_list) + 1
         # print(info_list_len)
     except Exception as err:
-        print(err)
+        #print(err)
         info_list_len = 0
         # print('进入科协官网出错。。。')
 
@@ -749,7 +763,7 @@ def package_data_dict(title=None, url=None, img=None, content=None, date=None, s
     try:
         date = datetime.datetime.strptime(date, '%Y-%m-%d')
     except Exception as err:
-        print(err)
+        #print(err)
         date = datetime.date.today()
     temp_dict['time'] = date
     temp_dict['author'] = ''
@@ -759,14 +773,14 @@ def package_data_dict(title=None, url=None, img=None, content=None, date=None, s
         try:
             source = AgencyDfkx.objects.filter(department=source)[0]
         except Exception as err:
-            print(err)
+            #print(err)
             source = None
             # print('地方科协来源错误')
     if tag == 2:
         try:
             source = AgencyQgxh.objects.filter(department=source)[0]
         except Exception as err:
-            print(err)
+            #print(err)
             source = None
             # print('全国学会来源错误')
     temp_dict['source'] = source
