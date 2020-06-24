@@ -71,6 +71,9 @@ def example(request):
     updata_get_rmw_news_data()
     # 人民网科技
     update_get_rmw_kj_data()
+
+    hanle_cast_into_mysql()
+    dfkxSpider.start_dfkx_spider()
     return HttpResponse('success')
     # context = {"news_list":news_list}
     # return render(request,'news.html', context)

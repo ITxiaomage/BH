@@ -8,7 +8,7 @@ IMG = 'mgh/18037327d8e41573fa3901_djL0Bhv_9Z4ln0T_jYHLGik.jpg'
 w2v_path_model ='/home/BH_TuiJian/kexie/w2v.model'
 #存放科协机构的文件路径
 #jiggou_path = r'E:\推荐相关\机构.xls'
-#jiggou_path = r'/home/BH_TuiJian/kexie/机构.xls'
+jiggou_path = r'/home/BH_TuiJian/kexie/机构.xls'
 
 #服务器地址
 IMG_ROOT = 'http://127.0.0.1:8102/media/'
@@ -29,7 +29,7 @@ WEEK= 7
 #模型名字和数据库的设计
 models_to_db_table = {"news":"News","kx":"KX","dfkx":"DFKX","qgxh":"QGXH","tech":"TECH","chinaTopNews":"ChinaTopNews"}
 #数据库表和频道的映射
-table_to_channel = {"时政要闻":"news", "中国科协":"kx","地方科协":"dfkx","全国学会":"qgxh","科技热点":"tech"}
+table_to_channel = {"时政要闻":"news", "中国科协":"kx","地方科协":"dfkx","全国学会":"qgxh","科技要情":"tech"}
 #定义全国学会频道
 CHANNEL_QGXH='全国学会'
 #定义地方科协频道
@@ -38,7 +38,7 @@ CHANNEL_DFKX='地方科协'
 #定义时政要闻频道
 CHANNEL_SZYW='时政要闻'
 #定义科技热点
-CHANNEL_KJRD='科技热点'
+CHANNEL_KJRD='科技要情'
 #定义中国科协
 CHANNEL_ZGKX='中国科协'
 
