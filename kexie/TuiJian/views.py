@@ -251,7 +251,7 @@ def individual(user_id, channel, mymodel,LB=None):
 # 数据库的种类都查询10条 排序返回
 def accord_label_get_news(mymodels, LB=None):
     result_list = []
-    result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, LB=LB))
+    result_list.extend(search_data_from_mysql(mymodels, MAX_SEARCH_NEWS, LB=LB))
 
     temp_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
     return limit_ten_news(temp_list)
@@ -669,7 +669,7 @@ def get_enough_news(news_list, mymodels):
         index = news_id.rindex("_")
         number = news_id[index + 1:]
         id_list.append(int(number))
-    news_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, id__list=id_list))
+    news_list.extend(search_data_from_mysql(mymodels, 50, id__list=id_list))
 
 
 # 刚开始过滤掉一周以前的新闻
