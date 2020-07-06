@@ -93,10 +93,20 @@ def get_user_news_list(request):
 
     try:
         flag = request.GET.get('flag')
+        if not flag:
+            flag=0
     except Exception as err:
         flag = 0
         #print('获取num错误')
         #print(err)
+
+    # 地方科协和学会登录时，会增加一个单独的首页
+    try:
+        main = request.GET.get('main')
+        if not main:
+            main = 0
+    except  Exception as e:
+        main = 0
 
     # 获取用户id
     try:
@@ -113,34 +123,37 @@ def get_user_news_list(request):
         department = request.GET.get('department')
         if department:
             department = json.loads(department)
+        else:
+            department=[]
     except Exception as err:
         print("获取用户department列表出现错误")
         department = []
         print(err)
     # 有用户id就按照用户id推送，并进行用户画像记录
-    result_list = accord_user_id_get_news_list(user_id, department, channel, flag)
+    result_list = accord_user_id_get_news_list(user_id, department, channel, flag,main)
     # else:  # 没有用户id,就按照部门推送，不进行用户画像记录
     #     result_list = channel_branch(channel, branch, flag)
     return HttpResponse(json.dumps(result_list, ensure_ascii=False))
 
 
 # 根据用户id和department和channel获取到新闻推荐的列表
-def accord_user_id_get_news_list(user_id, department, channel, flag):
+def accord_user_id_get_news_list(user_id, department, channel, flag, main=0):
     # 在时政要闻和科技热点进行个性化推荐
-    if channel == CHANNEL_SZYW:
+    #有空需要进行解耦，频道的名称应该只有数据库有
+    if channel == CHANNEL_SZYW: # 时政要闻
         result_list = individual(user_id, channel, News, LB=True)#暂时设置全部是带图片的
-    elif channel == CHANNEL_KJRD:
+    elif channel == CHANNEL_KJRD: # 科技热点
         result_list = individual(user_id, channel, TECH, LB=True)
     # 中国科协
     elif channel == CHANNEL_ZGKX:
         result_list = search_kx_data_from_mysql(flag)
     # 当前频道为全国学会，并且用户department有学会，就按照department，否则按时间检索
     elif channel == CHANNEL_QGXH:
-        result_list = get_qgxh_news_list(department)
+        result_list = get_qgxh_news_list(department,main)
 
     # 当前频道为地方科协，并且用户department有地方科协，就就按照department，否则按时间检索
     elif channel == CHANNEL_DFKX:
-        result_list = get_dfkx_news_list(department)
+        result_list = get_dfkx_news_list(department,main)
     elif channel == '战役防控':
         result_list = get_zyfk_news()
     else :
@@ -239,9 +252,7 @@ def individual(user_id, channel, mymodel,LB=None):
 def accord_label_get_news(mymodels, LB=None):
     result_list = []
     result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, LB=LB))
-    # result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=2, LB=LB))
-    # result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=3, LB=LB))
-    # result_list.extend(search_data_from_mysql(mymodels, MAX_NEWS_NUMBER, label=4, LB=LB))
+
     temp_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
     return limit_ten_news(temp_list)
 
@@ -406,21 +417,31 @@ def get_kx_leaders_from_mysql():
 
 
 # 全国学会频道推荐算法
-def get_qgxh_news_list(department):
+def get_qgxh_news_list(department=[],main=0):
     qgxh_dep_numben_list = num_xuehui()
     result_list = []
+    source_list =[]
     #department不为空
-    if department :
+    if main==str(1):
         # 找到用户兼职的所有全国学会单位，并根据这些单位去检索新闻。
         for one_dep in department:
             one_dep = str(one_dep)
             if one_dep in qgxh_dep_numben_list:
                 source = accord_number_get_department(one_dep)
-                result_list.extend(search_data_from_mysql(QGXH, source=AgencyQgxh.objects.filter(department=source)[0]))
+                result_list.extend(search_data_from_mysql(QGXH, source=source))
         # 如果result_list为空，说明用户没有在全国学会兼职，那么返回数据库最新的新闻
         if not result_list:
-            return sorted(search_data_from_mysql(QGXH), key=itemgetter('priority', 'news_time'), reverse=True)
-    # 新闻数量不够就一直补充
+             result_list = sorted(search_data_from_mysql(QGXH), key=itemgetter('priority', 'news_time'), reverse=True)
+
+    else:
+        for one in qgxh_dep_numben_list:
+            if int(one) not in department:
+                source_list.append(one)
+        for source in source_list:
+            result_list.extend(search_data_from_mysql(QGXH,n=1,source=source))
+    #优先级排序处理
+    result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
+
     if len(result_list) < MAX_NEWS_NUMBER:
         get_enough_news(result_list, QGXH)
         return result_list
@@ -429,68 +450,117 @@ def get_qgxh_news_list(department):
 
 
 # 地方科协频道推荐算法
-def get_dfkx_news_list(department):
+def get_dfkx_news_list(department=[], main=0):
     dfkx_dep_numben_list = num_dfkx()
     result_dict = {}
     label_one =[]
     label_two = []
     label_three = []
     lb_news = []
-    #不能为空
-    if department:
+    source_list=[]
+    if main == str(1): # 首页是根据source获取的
         # 找到用户兼职的所有地方科协单位，并根据这些单位去检索新闻。
         for one_dep in department:
             one_dep = str(one_dep)
             if one_dep in dfkx_dep_numben_list:
                 source = accord_number_get_department(one_dep)
+                source = AgencyDfkx.objects.filter(department=source)[0]
                 # 每个部门都需要检索标签为1.2.3的新闻资讯
-                label_one.extend(search_data_from_mysql(myModel=DFKX, n = LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0], label=1))
+                label_one.extend(search_data_from_mysql(myModel=DFKX, n=MAX_NEWS_NUMBER,source=source, label=1))
                 #这个新闻必须有图片
-                label_two.extend(search_data_from_mysql(myModel=DFKX, n = LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0],label=2, LB=True))
-                label_three.extend(search_data_from_mysql(myModel=DFKX, n =LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0],label=3))
+                label_two.extend(search_data_from_mysql(myModel=DFKX, n = MAX_NEWS_NUMBER,source=source,label=2, LB=True))
+                label_three.extend(search_data_from_mysql(myModel=DFKX, n =MAX_NEWS_NUMBER,source=source,label=3))
 
+        # 如果最基本的3条新闻都没有，那就随便补充新闻了
+        if len(label_one) < LIMIT_NEWS:
+            id_list = []
+            id_list.extend(get_news_id(label_one))
+            label_one.extend(search_data_from_mysql(myModel=DFKX, id__list=id_list, n=LIMIT_NEWS, label=1))
 
-    # 如果长度不够就补充新闻，要不然最多返回三个
-    if len(label_one) < LIMIT_NEWS:
-        id_list =[]
+        # 必须要有图
+        if len(label_two) < LIMIT_NEWS:
+            id_list = []
+            id_list.extend(get_news_id(label_two))
+            label_two.extend(
+                search_data_from_mysql(myModel=DFKX, id__list=id_list, n=LIMIT_NEWS, label=2, LB=True))
+
+        if len(label_three) < LIMIT_NEWS:
+            id_list = []
+            id_list.extend(get_news_id(label_three))
+            label_three.extend(
+                search_data_from_mysql(myModel=DFKX, id__list=id_list, n=LIMIT_NEWS, label=3))
+        # 然后排序
+        label_one = sorted(label_one, key=itemgetter('priority', 'news_time'), reverse=True)
+        label_two = sorted(label_two, key=itemgetter('priority', 'news_time'), reverse=True)
+        label_three = sorted(label_three, key=itemgetter('priority', 'news_time'), reverse=True)
+
+        # 然后裁剪
+        if len(label_one) > LIMIT_NEWS:  # 在这里一般只会超出臭猪，
+            label_one = label_one[:LIMIT_NEWS]
+        if len(label_two) > LIMIT_NEWS:  # 在这里一般只会超出臭猪，
+            label_two = label_two[:LIMIT_NEWS]
+
+        if len(label_three) > LIMIT_NEWS:  # 在这里一般只会超出臭猪，
+            label_three = label_three[:LIMIT_NEWS]
+
+        # 找轮播图,把已经出现的新闻过滤掉
+        id_list = []
         id_list.extend(get_news_id(label_one))
-        label_one.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list,n =LIMIT_NEWS,label=1))
-
-    #必须要有图
-    if len(label_two) < LIMIT_NEWS:
-        id_list =[]
         id_list.extend(get_news_id(label_two))
-        label_two.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list, n=LIMIT_NEWS, label=2, LB=True))
-
-    if len(label_three) < LIMIT_NEWS:
-        id_list =[]
         id_list.extend(get_news_id(label_three))
-        label_three.extend(search_data_from_mysql(myModel=DFKX, id__list= id_list, n=LIMIT_NEWS, label=3))
-
-    # 找轮播图,把已经出现的新闻过滤掉
-    id_list = []
-    id_list.extend(get_news_id(label_one))
-    id_list.extend(get_news_id(label_two))
-    id_list.extend(get_news_id(label_three))
-    #轮播图的执行策略，优先按照时间去所在部门的，如果没有，就补充其他单位的
-    if department:
         for one_dep in department:
             one_dep = str(one_dep)
             if one_dep in dfkx_dep_numben_list:
                 source = accord_number_get_department(one_dep)
-                lb_news.extend(search_data_from_mysql(myModel=DFKX, n=LIMIT_NEWS,source=AgencyDfkx.objects.filter(department=source)[0], id__list=id_list, LB=True))
-    else:
+                source = AgencyDfkx.objects.filter(department=source)[0]
+                lb_news.extend(search_data_from_mysql(myModel=DFKX, n=MAX_NEWS_NUMBER, source=source, id__list=id_list, LB=True))
+        #还是不够，就不在乎source，只需要有图就行
+        if len(lb_news) < LIMIT_NEWS:
+            lb_news.extend(search_data_from_mysql(myModel=DFKX, n=LIMIT_NEWS, id__list=id_list, LB=True))
+
+    else: #main == 0 时，地方科协需要排除原始的source
+
+        for one in dfkx_dep_numben_list:
+            if int(one) not in department:
+                source_list.append(one)
+
+        #对于每一个source_list里面的都检索一条新闻
+        for source in source_list:
+            source_ = accord_number_get_department(source)
+            _source = AgencyDfkx.objects.filter(department=source_)[0]
+            label_one.extend(search_data_from_mysql(myModel=DFKX, n = 1, label=1,source=_source))
+            #这个新闻必须有图片
+            label_two.extend(search_data_from_mysql(myModel=DFKX, n = 1,label=2, LB=True,source=_source))
+            label_three.extend(search_data_from_mysql(myModel=DFKX, n =1,label=3,source=_source))
+
+
+
+        # 然后排序
+        label_one = sorted(label_one, key=itemgetter('priority', 'news_time'), reverse=True)
+        label_two = sorted(label_two, key=itemgetter('priority', 'news_time'), reverse=True)
+        label_three = sorted(label_three, key=itemgetter('priority', 'news_time'), reverse=True)
+
+        # 然后裁剪
+        if len(label_one) > LIMIT_NEWS:  # 在这里一般只会超出臭猪，
+            label_one = label_one[:LIMIT_NEWS]
+        if len(label_two) > LIMIT_NEWS:  # 在这里一般只会超出臭猪，
+            label_two = label_two[:LIMIT_NEWS]
+
+        if len(label_three) > LIMIT_NEWS:  # 在这里一般只会超出臭猪，
+            label_three = label_three[:LIMIT_NEWS]
+
+        # 找轮播图,把已经出现的新闻过滤掉
+        id_list = []
+        id_list.extend(get_news_id(label_one))
+        id_list.extend(get_news_id(label_two))
+        id_list.extend(get_news_id(label_three))
+        #
         lb_news.extend(search_data_from_mysql(myModel=DFKX, n=LIMIT_NEWS, id__list=id_list, LB=True))
-    if len(lb_news) < LIMIT_NEWS:
-        lb_news.extend(search_data_from_mysql(myModel=DFKX, n=LIMIT_NEWS,id__list=id_list,LB=True))
+        #如果恰好没有，就只能用source 的了
 
-    if len(label_one)>LIMIT_NEWS: #在这里一般只会超出臭猪，
-        label_one = label_one[:LIMIT_NEWS]
-    if len(label_two)>LIMIT_NEWS: #在这里一般只会超出臭猪，
-        label_two = label_two[:LIMIT_NEWS]
+        lb_news = sorted(lb_news, key=itemgetter('priority', 'news_time'), reverse=True)
 
-    if len(label_three)>LIMIT_NEWS: #在这里一般只会超出臭猪，
-        label_three = label_three[:LIMIT_NEWS]
+
     if len(lb_news)>LIMIT_NEWS: #在这里一般只会超出臭猪，
         lb_news = lb_news[:LIMIT_NEWS]
 
@@ -501,18 +571,6 @@ def get_dfkx_news_list(department):
     result_dict['provincial'] = label_three #学会
 
     return result_dict
-        #
-        #
-        # # 如果result_list为空，说明用户没有在地方科协兼职，那么返回数据库最新的新闻
-        # if not result_list:
-        #     return sorted(search_data_from_mysql(DFKX), key=itemgetter('priority', 'news_time'), reverse=True)
-
-    # # 补充新闻数量
-    # if len(result_list) < MAX_NEWS_NUMBER:
-    #     get_enough_news(result_list, DFKX)
-    #     return result_list
-    # else:
-    #     return result_list[:MAX_NEWS_NUMBER]
 
 
 # 得到已经检索的新闻id
@@ -578,10 +636,10 @@ def search_kx_data_from_mysql(flag=0):
         temp_list = sort_kx_news(news_list=result_list, keywords_list=kx_leaders_list)[:3]
     else:
         temp_list = sort_kx_news(news_list=result_list, keywords_list=kx_leaders_list)
-    # 要闻
+    # 要闻，要闻这里是按照优先级排序的
     result_dict['news'] = temp_list
 
-    # 通知，flag = 0 三条 flag = 1 10条
+    #  通知，flag = 0 三条 flag = 1 10条
     if not flag:
         temp_list = search_data_from_mysql(myModel=KX, n=LIMIT_NEWS, label=3)
     else:
@@ -643,13 +701,47 @@ def get_all_channel():
 
 
 # 按照条件数据，返回一个列表
-def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[], label=None, LB=False):
+def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[], label=None, LB=False, ):
     result = []
     data = None
-    # label检索
-    if label and source: #针对全国学会和地方科协的检索系统，既要有label又要有source
+    ### id__list 和 source__list是默认状态
+    if label and source and (not LB):  # label 和source 无图 地方科协1.3
         try:
-            data = myModel.objects.filter(hidden=1).filter(source=source).filter(label=label).exclude(id__in=id__list).values_list('id',
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(label=label).values_list('id',
+                                             'title',
+                                             'img',
+                                             'time',
+                                             'source',
+                                             'comment',
+                                             'like',
+                                             'priority',
+                                             'label').order_by(
+                '-time')[:n]
+        except Exception as err:
+            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
+
+    elif label and source and LB:  # 带label source 还有图 地方科协2
+        try:
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(label=label).filter(~Q(img=None)).filter(
+                ~Q(img='')).filter(~Q(img=' ')).values_list('id', 'title', 'img', 'time',
+                                                            'source', 'comment', 'like',
+                                                            'priority', 'label').order_by(
+                '-time')[:n]
+        except Exception as err:
+            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
+    elif source and LB:# 只有source和图 地方科协轮播图
+        try:
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(~Q(img=None)).filter(
+                ~Q(img='')).filter(~Q(img=' ')).values_list('id', 'title', 'img', 'time',
+                                                            'source', 'comment', 'like',
+                                                            'priority', 'label').order_by(
+                '-time')[:n]
+        except Exception as err:
+            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
+
+    elif source:#只有source 就可以查到 全国学会
+        try:
+            data = myModel.objects.filter(hidden=1).filter(source=source).exclude(id__in=id__list).values_list('id',
                                                                                                              'title',
                                                                                                              'img',
                                                                                                              'time',
@@ -661,7 +753,16 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    elif label: #中国科协频道的只需要label
+    elif LB and label: #只有图和标签，无source 地方科协2（非主）
+        try:
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(label=label).filter(~Q(img=None)).filter(
+                ~Q(img='')).filter(~Q(img=' ')).values_list('id', 'title', 'img', 'time',
+                                                            'source', 'comment', 'like',
+                                                            'priority', 'label').order_by(
+                '-time')[:n]
+        except Exception as err:
+            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
+    elif label:#只有label就可以获取到
         try:
             data = myModel.objects.filter(hidden=1).filter(label=label).exclude(id__in=id__list).values_list('id',
                                                                                                              'title',
@@ -675,46 +776,23 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
+    elif LB:#只想找有图的
+        try:
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(~Q(img=None)).filter(~Q(img='')).filter(
+                ~Q(img=' ')).values_list('id', 'title', 'img', 'time',
+                                         'source', 'comment', 'like',
+                                         'priority', 'label').order_by(
+                '-time')[:n]
+        except Exception as err:
+            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
+    else:#就找数据，无条件
+        try:
+            data = myModel.objects.filter(hidden=1).values_list(
+                'id', 'title', 'img','time', 'source', 'comment', 'like', 'priority', 'label').order_by('-time')[:n]
+        except Exception as err:
+            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
 
-    elif LB and source :  # 找轮播图
-        try:
-            data = myModel.objects.exclude(id__in=id__list).filter(source=source).filter(~Q(img=None)).filter(~Q(img='')).filter(~Q(img=' ')).values_list('id', 'title', 'img', 'time',
-                                                                                  'source', 'comment', 'like',
-                                                                                  'priority', 'label').order_by(
-                '-time')[:n]
-        except Exception as err:
-            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    elif LB :
-        try:
-            data = myModel.objects.exclude(id__in=id__list).filter(~Q(img=None)).filter(~Q(img='')).filter(~Q(img=' ')).values_list('id', 'title', 'img', 'time',
-                                                                                  'source', 'comment', 'like',
-                                                                                  'priority', 'label').order_by(
-                '-time')[:n]
-        except Exception as err:
-            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    elif not source:
-        try:
-            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).values_list('id', 'title', 'img', 'time',
-                                                                                         'source', 'comment', 'like',
-                                                                                         'priority', 'label').order_by(
-                '-time')[:n]
-        except Exception as err:
-            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    else:
-        try:
-            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).values_list('id',
-                                                                                                               'title',
-                                                                                                               'img',
-                                                                                                               'time',
-                                                                                                               'source',
-                                                                                                               'comment',
-                                                                                                               'like',
-                                                                                                               'priority',
-                                                                                                               'label').order_by(
-                '-time')[:n]
-        except Exception as err:
-            print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-            print(err)
+
     if data:
         for one in data:
             temp_dict = {}
