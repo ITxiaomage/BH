@@ -27,9 +27,9 @@ sched_2 = Scheduler()  # 实例化，固定格式
 def mytask_1():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # 科协一家
-    update_kxyj_data()
+    #update_kxyj_data()
     # 中央新闻
-    update_china_top_news()
+    #update_china_top_news()
     # 科协官网
     update_kexie_news_into_mysql()
 
@@ -62,9 +62,9 @@ def example(request):
     #dfkxSpider.yqfk()
     #hanle_cast_into_mysql()
     # 科协一家
-    update_kxyj_data()
+    #update_kxyj_data()
     # 中央新闻
-    update_china_top_news()
+    #update_china_top_news()
     # 科协官网
     update_kexie_news_into_mysql()
     # 人名网时政

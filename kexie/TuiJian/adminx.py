@@ -187,16 +187,16 @@ class NewsAdmin(NewNewsBaseClass):
 xadmin.site.register(News, NewsAdmin)
 
 
-class ChinaTopNewsAdmin(NewNewsBaseClass):
-    pass
-
-
-xadmin.site.register(ChinaTopNews, ChinaTopNewsAdmin)
-class YqfkAdmin(NewNewsBaseClass):
-    pass
-
-
-xadmin.site.register(YQFK, YqfkAdmin)
+# class ChinaTopNewsAdmin(NewNewsBaseClass):
+#     pass
+#
+#
+# xadmin.site.register(ChinaTopNews, ChinaTopNewsAdmin)
+# class YqfkAdmin(NewNewsBaseClass):
+#     pass
+#
+#
+# xadmin.site.register(YQFK, YqfkAdmin)
 
 class AgencyJgAdmin(NewOrgBaseClass):
     pass
