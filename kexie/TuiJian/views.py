@@ -22,8 +22,8 @@ sched_1 = Scheduler()  # 实例化，固定格式
 sched_2 = Scheduler()  # 实例化，固定格式
 
 
-#  五个小时更新一次
-@sched_1.interval_schedule(hours=5)
+#  8个小时更新一次
+@sched_1.interval_schedule(hours=8)
 def mytask_1():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # 科协一家
@@ -36,7 +36,7 @@ def mytask_1():
     # 人名网时政
     updata_get_rmw_news_data()
     # 人民网科技
-    update_get_rmw_kj_data()
+    #update_get_rmw_kj_data()
     #疫情防控
     #dfkxSpider.yqfk()
     print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
@@ -70,7 +70,7 @@ def example(request):
     # 人名网时政
     updata_get_rmw_news_data()
     # 人民网科技
-    update_get_rmw_kj_data()
+    #update_get_rmw_kj_data()
 
     hanle_cast_into_mysql()
     dfkxSpider.start_dfkx_spider()
