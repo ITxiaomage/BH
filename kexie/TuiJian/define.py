@@ -9,6 +9,8 @@ w2v_path_model ='/home/BH_TuiJian/kexie/w2v.model'
 #存放科协机构的文件路径
 #jiggou_path = r'E:\推荐相关\机构.xls'
 jiggou_path = r'/home/BH_TuiJian/kexie/机构.xls'
+#run文件路径
+RUNPATH =r'/home/BH_TuiJian/kexie/kexie/BH95/kexie/run.log'
 
 #服务器地址
 IMG_ROOT = 'http://127.0.0.1:8102/media/'
