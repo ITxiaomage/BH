@@ -6,13 +6,14 @@ from . import handle_cast
 from .organiza import *
 from .mongo import *
 from .calSimilarNews import *
-from datetime import datetime
+from datetime import datetime, timedelta
 from operator import itemgetter
 import json
 from simhash import Simhash
 from django.db.models import Q
 from . import CommonMethod,dfkxSpider
 from functools import reduce
+import re
 
 
 ####################################定时任务#########################
@@ -814,18 +815,46 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
 
 
 ####################################获取的中央领导人接口##################################################
+#修改为获取run.log文件的数据
 def get_china_top_news(request):
     result_dict = {}
-    try:
-        chinaTopNews = ChinaTopNews.objects.all().order_by('-time')[0]
-        result_dict['news_title'] = chinaTopNews.title
-        result_dict['news_time'] = str(chinaTopNews.time)
-        result_dict['news_img'] = CommonMethod.get_correct_img(chinaTopNews.img)
-        result_dict['news_source'] = chinaTopNews.source
-        result_dict['news_id'] = str(ChinaTopNews._meta.db_table) + '_' + str(chinaTopNews.id)
-    except Exception as err:
-        print('读取置顶中央新闻失败')
-        print(err)
+    dateDict = {'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun',
+                '07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec'}
+    with open(RUNPATH, encoding='UTF-8') as f:
+        contents = f.read()
+        # 当前日期
+        Toady = datetime.now().date()
+        for index in range(7):
+            date_2 = Toady + timedelta(days=-index)
+            year = str(date_2.year)
+            month = str(date_2.month) if date_2.month > 9 else '0' + str(date_2.month)
+            month = dateDict[month]
+            day = str(date_2.day) if date_2.day > 9 else '0' + str(date_2.day)
+            textTime = day + '/' + month + '/' + year
+            #print(textTime)
+            result_dict[str(date_2)] = contents.count(textTime)
+
+            # if 'GET' in content:
+            #     ret = re.compile(r'[(\d+)/(\w+)/(\d+)].*"GET')
+
+
+        allAgency = AgencyJg.objects.values_list()
+        for one in allAgency:
+            department = one[2]
+            departmentNumber = one[1]
+            departmentCounts = contents.count(departmentNumber)
+            result_dict[department] = departmentCounts
+
+    # try:
+    #     chinaTopNews = ChinaTopNews.objects.all().order_by('-time')[0]
+    #     result_dict['news_title'] = chinaTopNews.title
+    #     result_dict['news_time'] = str(chinaTopNews.time)
+    #     result_dict['news_img'] = CommonMethod.get_correct_img(chinaTopNews.img)
+    #     result_dict['news_source'] = chinaTopNews.source
+    #     result_dict['news_id'] = str(ChinaTopNews._meta.db_table) + '_' + str(chinaTopNews.id)
+    # except Exception as err:
+    #     print('读取置顶中央新闻失败')
+    #     print(err)
     return HttpResponse(json.dumps(result_dict, ensure_ascii=False))
 
 
