@@ -824,6 +824,7 @@ def get_china_top_news(request):
         contents = f.read()
         # 当前日期
         Toady = datetime.now().date()
+        fisrtIndex = 0
         for index in range(7):
             date_2 = Toady + timedelta(days=-index)
             year = str(date_2.year)
@@ -832,18 +833,27 @@ def get_china_top_news(request):
             day = str(date_2.day) if date_2.day > 9 else '0' + str(date_2.day)
             textTime = day + '/' + month + '/' + year
             #print(textTime)
-            result_dict[str(date_2)] = contents.count(textTime)
+            textTimeCounts = contents.count(textTime)
+            result_dict[str(date_2)] = textTimeCounts
+            #if textTimeCounts > 0 :
+            fisrtIndex = contents.find(textTime) if textTimeCounts > 0 else fisrtIndex
 
             # if 'GET' in content:
             #     ret = re.compile(r'[(\d+)/(\w+)/(\d+)].*"GET')
 
+        contents = contents[fisrtIndex:]
 
         allAgency = AgencyJg.objects.values_list()
+        temp_dict ={}
         for one in allAgency:
             department = one[2]
             departmentNumber = one[1]
             departmentCounts = contents.count(departmentNumber)
-            result_dict[department] = departmentCounts
+            if departmentCounts > 0:
+                temp_dict[department] = departmentCounts
+        for one in sorted(temp_dict.items(), key=lambda item:item[1], reverse=True):
+            result_dict[one[0]] = one[1]
+
 
     # try:
     #     chinaTopNews = ChinaTopNews.objects.all().order_by('-time')[0]
