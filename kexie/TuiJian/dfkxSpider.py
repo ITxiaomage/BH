@@ -28,7 +28,7 @@ def get_text(url):
 def get_selenium_head(url):
     options = Options()
     options.add_argument("--no-sandbox")
-    options.add_argument("--headless")
+    #options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     driver = webdriver.Chrome(options=options)
     try:
@@ -872,45 +872,51 @@ def get_gdkx():
 ###########################广西科协###########################
 def get_gxkx_news(label, url, base_url=r'http://www.gxast.org.cn'):
     temp_list = []
-    soup = get_text(url)
-    if not soup:
+    driver = get_selenium_head(url)
+    #print(driver)
+    if not driver:
         return temp_list
     try:
-        news_list = soup.find_all("div", class_="recognition_awards_list")[0].select("ul>li")
-    except :
+        driver.implicitly_wait(10)
+        label_count = -1
+        label_array = [1, 1, 1, 3, 2]
+        news_lists = driver.find_elements_by_class_name("xs_lis")
+        for news_list in news_lists:
+            label_count = label_count + 1
+            news_list = news_list.find_elements_by_tag_name("li")
+            for news in news_list:
+                #print(news)
+                news_url = str(news.find_element_by_tag_name("a").get_attribute("href"))
+                news_title = str(news.get_attribute("title"))
+                news_label = label_array[label_count]
+                try:
+                    ddriver = get_selenium_head(news_url)
+                    ddriver.implicitly_wait(3)
+                    news_time = ddriver.find_element_by_class_name("new_xq_tl").find_elements_by_tag_name("span")[
+                        1].text
+                    news_time = re.search(r"(\d{4}-\d{1,2}-\d{1,2})", news_time)[0]
+                    news_zoom = ddriver.find_element_by_class_name("new_xq_nr")
+                    bs = BeautifulSoup(news_zoom.get_attribute("outerHTML"), 'lxml')
+                    news_img = complete_img_a(base_url, bs)
+                    news_content = str(bs)
+                    dict = dict_list(news_title, news_url, news_img, news_content, news_time, news_label)
+                    #print(dict)
+                    temp_list.append(dict)
+                    ddriver.quit()
+                except Exception as e:
+                    #print(e)
+                    ddriver.quit()
+    except Exception as err:
+        #print(err)
         news_list = []
-    for one_news in news_list:
-        news_title = str(one_news.select("li>span>a")[0]["title"])
-        news_url = str(one_news.select("li>span>a")[0]["href"])
-        news_time = str(one_news.select("li>span")[1].text)
-        news_label = str(label)
-        ssoup = get_text(news_url)
-        if  ssoup:
-            news_zoom = ssoup.find_all("div", class_="recognition_awards_list")[0]
-        else:
-            news_zoom = None
-        news_img = complete_img_a(base_url, news_zoom)
-        if news_img == 'http://www.gxast.org.cn/r/cms/www_gxast_org_cn/default/images/fj_icon.gif':
-            news_img = None
-        news_content = str(news_zoom)
-
-        temp_list.append(
-            spider.package_data_dict(
-                title=news_title, url=news_url, img=news_img,
-                content=news_content, date=news_time,
-                source='广西壮族自治区科协', label=news_label, tag=1))
+    driver.quit()
     return temp_list
 
 
 def get_gxkx():
     result_list = []
     try:
-        result_list.extend(get_gxkx_news(1, r'http://www.gxast.org.cn/tongzhigonggao2/index.jhtml'))
-        result_list.extend(get_gxkx_news(1, r'http://www.gxast.org.cn/gxastttyw/index.jhtml'))
-        result_list.extend(get_gxkx_news(1, r'http://www.gxast.org.cn/dongtaixinxi/index.jhtml'))
-        result_list.extend(get_gxkx_news(3, r'http://www.gxast.org.cn/xuehuixueshu/index.jhtml'))
-        result_list.extend(get_gxkx_news(2, r'http://www.gxast.org.cn/jckp/index.jhtml'))
-        result_list.extend(get_gxkx_news(2, r'http://www.gxast.org.cn/kepudongtai/index.jhtml'))
+        result_list.extend(get_gxkx_news(1, r'http://www.gxast.org.cn/'))
     except Exception as err:
         pass
     finally:
