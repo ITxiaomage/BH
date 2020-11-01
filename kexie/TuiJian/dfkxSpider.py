@@ -8,6 +8,8 @@ import datetime
 import json
 import requests
 import numpy as np
+from selenium.webdriver import DesiredCapabilities
+from pyvirtualdisplay import Display
 
 from TuiJian.models import DFKX, YQFK
 from . import spider
@@ -26,9 +28,11 @@ def get_text(url):
 
 
 def get_selenium_head(url):
+    display = Display(visible=0, size=(800, 600))
+    display.start()
     options = Options()
     options.add_argument("--no-sandbox")
-    #options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     driver = webdriver.Chrome(options=options)
     try:
