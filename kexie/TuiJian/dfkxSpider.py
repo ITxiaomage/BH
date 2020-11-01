@@ -2972,3 +2972,10 @@ def start_dfkx_spider():
     except Exception as e:
         pass
         #print(e)
+
+def start_gxkx_spider():
+    try:
+        #广西  测试完毕
+        news_insert_data(get_gxkx())
+    except Exception as e:
+        pass
