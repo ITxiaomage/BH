@@ -903,9 +903,14 @@ def get_gxkx_news(label, url, base_url=r'http://www.gxast.org.cn'):
                     bs = BeautifulSoup(news_zoom.get_attribute("outerHTML"), 'lxml')
                     news_img = complete_img_a(base_url, bs)
                     news_content = str(bs)
-                    dict = dict_list(news_title, news_url, news_img, news_content, news_time, news_label)
+                    temp_list.append(
+                        spider.package_data_dict(
+                            title=news_title, url=news_url, img=news_img,
+                            content=news_content, date=news_time,
+                            source='广西壮族自治区科协', label=news_label, tag=1))
+                    # dict = dict_list(news_title, news_url, news_img, news_content, news_time, news_label)
                     #print(dict)
-                    temp_list.append(dict)
+                    # temp_list.append(dict)
                     ddriver.quit()
                 except Exception as e:
                     #print(e)
