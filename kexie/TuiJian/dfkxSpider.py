@@ -28,11 +28,11 @@ def get_text(url):
 
 
 def get_selenium_head(url):
-    display = Display(visible=0, size=(800, 600))
-    display.start()
+    # display = Display(visible=0, size=(800, 600))
+    # display.start()
     options = Options()
     options.add_argument("--no-sandbox")
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     driver = webdriver.Chrome(options=options)
     try:
