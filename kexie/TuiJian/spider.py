@@ -759,6 +759,7 @@ def package_data_dict(title=None, url=None, img=None, content=None, date=None, s
     new_content = str(content).replace('style', ' ').replace('width', ' ').replace('height', ' ')
     temp_dict['content'] = new_content
     temp_dict['img'] = img
+    temp_dict['hidden'] = 0
     # 先将字符串形式的日期转化为date类型
     try:
         date = datetime.datetime.strptime(date, '%Y-%m-%d')

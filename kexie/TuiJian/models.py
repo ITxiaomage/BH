@@ -64,7 +64,7 @@ class NewsBase(models.Model):
     #限制人工干预优先级的最大值是100，最小值是0
     priority =  models.IntegerField(default= 0,validators=[MaxValueValidator(100),MinValueValidator(0)],verbose_name='优先级',blank=True)
     #屏蔽新闻的标志,默认不屏蔽设置为1，屏蔽就设置为0
-    hidden = models.BooleanField(default= True,verbose_name='是否推送',blank=True)
+    hidden = models.BooleanField(default= False,verbose_name='是否推送',blank=True)
 
     def go_to(self):
         from django.utils.safestring import mark_safe

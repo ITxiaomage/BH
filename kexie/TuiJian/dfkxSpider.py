@@ -41,6 +41,20 @@ def get_selenium_head(url):
         driver = None
     return driver
 
+def get_gx_head(url):
+    display = Display(visible=0, size=(800, 600))
+    display.start()
+    options = Options()
+    options.add_argument("--no-sandbox")
+    # options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    driver = webdriver.Chrome(options=options)
+    try:
+        driver.get(url)
+    except Exception as err:
+        driver = None
+    return driver
+
 
 def news_to_json(result_list, file):
     keys = [str(x) for x in np.arange(len(result_list))]
@@ -876,8 +890,9 @@ def get_gdkx():
 ###########################广西科协###########################
 def get_gxkx_news(label, url, base_url=r'http://www.gxast.org.cn'):
     temp_list = []
-    driver = get_selenium_head(url)
-    #print(driver)
+    driver = get_gx_head(url)
+    # driver = get_selenium_head(url)
+    # print(driver)
     if not driver:
         return temp_list
     try:
