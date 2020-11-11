@@ -445,7 +445,8 @@ def get_qgxh_news_list(department=[],main=0):
 
     if len(result_list) < MAX_NEWS_NUMBER:
         get_enough_news(result_list, QGXH)
-        return result_list
+        result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
+        return result_list[:MAX_NEWS_NUMBER]
     else:
         return result_list[:MAX_NEWS_NUMBER]
 
