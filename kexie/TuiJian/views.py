@@ -85,6 +85,7 @@ def get_user_news_list(request):
     # 获取频道错误就设置第一个频道
     try:
         channel = request.GET.get('channel')
+        print("current channel:{0}:".format(channel))
         # if channel not in get_all_channel():
         #     channel = ChannelToDatabase.objects.all().values_list('channel')[0][0]
     except Exception as err:
@@ -150,6 +151,7 @@ def accord_user_id_get_news_list(user_id, department, channel, flag, main=0):
         result_list = search_kx_data_from_mysql(flag)
     # 当前频道为全国学会，并且用户department有学会，就按照department，否则按时间检索
     elif channel == CHANNEL_QGXH:
+        print("开始进入全国学会函数")
         result_list = get_qgxh_news_list(department,main)
 
     # 当前频道为地方科协，并且用户department有地方科协，就就按照department，否则按时间检索
@@ -435,6 +437,7 @@ def get_qgxh_news_list(department=[],main=0):
              result_list = sorted(search_data_from_mysql(QGXH), key=itemgetter('priority', 'news_time'), reverse=True)
 
     else:
+        print("进行检索")
         for one in qgxh_dep_numben_list:
             if int(one) not in department:
                 source_list.append(one)
@@ -445,7 +448,10 @@ def get_qgxh_news_list(department=[],main=0):
 
     if len(result_list) < MAX_NEWS_NUMBER:
         get_enough_news(result_list, QGXH)
+        print("检索的数据总量为{0}".format(len(result_list)))
         result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
+        for i in result_list:
+            print(i['title'])
         return result_list[:MAX_NEWS_NUMBER]
     else:
         return result_list[:MAX_NEWS_NUMBER]
