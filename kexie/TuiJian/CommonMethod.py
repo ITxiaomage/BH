@@ -5,24 +5,25 @@ import base64
 import requests
 from io import BytesIO
 
+
 # 图片转base64
 def image_to_base64(url):
     response = requests.get(url)
-    result =base64.b64encode(BytesIO(response.content).read())
+    result = base64.b64encode(BytesIO(response.content).read())
     return 'data:image/jpeg;base64,' + str(result, encoding="utf-8")
 
 
-
-
 def get_correct_img(img):
-    if not img :
+    if not img:
         return None
-    img  = str(img)
-    if  img.startswith('http'):
+    img = str(img)
+    if img.startswith('http'):
         return img
     else:
-        #return image_to_base64(define.LOC_IMG_ROOT + img)
-        return image_to_base64(define.IMG_ROOT + img)
+        # return image_to_base64(define.LOC_IMG_ROOT + img)
+        return '/' + img
+        # image_to_base64(define.IMG_ROOT + img)
+
 
 # 拿到source
 def get_short_source(myModel, source):
@@ -63,6 +64,8 @@ def table_to_models(db_table):
     elif YQFK._meta.db_table == db_table:
         mymodels = YQFK
     return mymodels
+
+
 # 根据新闻id获取到数据表和在表中的id
 def get_table_and_id(news_id):
     try:
