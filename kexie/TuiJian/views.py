@@ -804,7 +804,7 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
 
             #在这里要进行img
             # temp_dict['news_img'] = CommonMethod.get_correct_img(one[2])
-            temp_dict['news_img'] = one[2]
+            temp_dict['news_img'] = '\\' + str(one[2])
             temp_dict['news_time'] = str(one[3])
             # 新闻来源要特殊处理一下，展示给用户的是新闻简称
             temp_dict['news_source'] = CommonMethod.get_short_source(myModel, one[4])
