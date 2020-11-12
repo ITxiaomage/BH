@@ -49,8 +49,8 @@ class NewOrgBaseClass(object):
     # 排序
     ordering = ('id',)
     # 可编辑
-    list_editable = ['short']
-    readonly_fields = ("department", 'number')
+    list_editable = ['short', 'department', 'number']
+    # readonly_fields = ("department", 'number')
 
 
 class NewNewsBaseClass(object):
