@@ -119,6 +119,26 @@ def get_user_news_list(request):
     # 临时修改为默认用户
     if not user_id:
         user_id = '999'
+
+    # 获取用户名
+    try:
+        name = request.GET.get('name')
+    except Exception as err:
+        print("获取用户名出现错误")
+        name = None
+    # 临时修改为默认用户名
+    if not name:
+        name = 'user'
+
+    # 获取用户头像
+    try:
+        portrait_url = request.GET.get('portrait_url')
+    except Exception as err:
+        print("获取用户头像出现错误")
+        portrait_url = None
+    if not portrait_url:
+        portrait_url = ''
+
     # 获取用户department列表
     try:
         department = request.GET.get('department')
