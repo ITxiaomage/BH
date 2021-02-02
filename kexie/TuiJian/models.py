@@ -83,6 +83,17 @@ class NewsBase(models.Model):
         ordering=['-time']
 
 
+## 临时增加一个疫情春节的表
+class YQCJ(NewsBase):
+    source = models.CharField(max_length=255, null=True, verbose_name='新闻来源', blank=True)
+    class Meta:
+        db_table = "yqcj"
+        verbose_name = "疫情春节新闻"
+        verbose_name_plural = "疫情春节新闻"
+
+
+
+
 ## 临时增加一个疫情防控的表
 class YQFK(NewsBase):
     source = models.CharField(max_length=255, null=True, verbose_name='新闻来源', blank=True)
@@ -138,7 +149,7 @@ class ChinaTopNews(NewsBase):
 
 class ChannelToDatabase(models.Model):
     channel = models.CharField(max_length=255,unique=True,null=False)
-    database =  models.CharField(max_length=255,unique=True,null=False)
+    database = models.CharField(max_length=255,unique=True,null=False)
     class Meta:
         db_table = 'channelToDatabase'
         verbose_name = "频道和数据库的映射"

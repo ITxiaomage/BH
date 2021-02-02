@@ -11,10 +11,9 @@ from operator import itemgetter
 import json
 from simhash import Simhash
 from django.db.models import Q
-from . import CommonMethod,dfkxSpider
+from . import CommonMethod, dfkxSpider
 from functools import reduce
 import re
-
 
 ####################################定时任务#########################
 from apscheduler.scheduler import Scheduler
@@ -28,18 +27,18 @@ sched_2 = Scheduler()  # 实例化，固定格式
 def mytask_1():
     print('定时任务启动,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
     # 科协一家
-    #update_kxyj_data()
+    # update_kxyj_data()
     # 中央新闻
-    #update_china_top_news()
+    # update_china_top_news()
     # 科协官网
     update_kexie_news_into_mysql()
 
     # 人名网时政
     updata_get_rmw_news_data()
     # 人民网科技
-    #update_get_rmw_kj_data()
-    #疫情防控
-    #dfkxSpider.yqfk()
+    # update_get_rmw_kj_data()
+    # 疫情防控
+    # dfkxSpider.yqfk()
     print('定时任务结束,时间为：{0}'.format(datetime.now().strftime("%Y-%m-%d")))
 
 
@@ -60,19 +59,19 @@ sched_2.start()  # 启动该脚本
 def example(request):
     dfkxSpider.start_gxkx_spider()
     news_list = []
-    #news_list.append(spider.china_top_news())
-    #dfkxSpider.yqfk()
-    #hanle_cast_into_mysql()
+    # news_list.append(spider.china_top_news())
+    # dfkxSpider.yqfk()
+    # hanle_cast_into_mysql()
     # 科协一家
-    #update_kxyj_data()
+    # update_kxyj_data()
     # 中央新闻
-    #update_china_top_news()
+    # update_china_top_news()
     # 科协官网
     update_kexie_news_into_mysql()
     # 人名网时政
     updata_get_rmw_news_data()
     # 人民网科技
-    #update_get_rmw_kj_data()
+    # update_get_rmw_kj_data()
     hanle_cast_into_mysql()
     dfkxSpider.start_dfkx_spider()
     return HttpResponse('success')
@@ -90,16 +89,16 @@ def get_user_news_list(request):
     except Exception as err:
         channel = ChannelToDatabase.objects.all().values_list('channel')[0][0]
         print("获取频道出现错误，因此设为默认值:{0}".format(channel))
-        #print(err)
+        # print(err)
 
     try:
         flag = request.GET.get('flag')
         if not flag:
-            flag=0
+            flag = 0
     except Exception as err:
         flag = 0
-        #print('获取num错误')
-        #print(err)
+        # print('获取num错误')
+        # print(err)
 
     # 地方科协和学会登录时，会增加一个单独的首页
     try:
@@ -115,7 +114,7 @@ def get_user_news_list(request):
     except Exception as err:
         print("获取用户id出现错误")
         user_id = None
-        #print(err)
+        # print(err)
     # 临时修改为默认用户
     if not user_id:
         user_id = '999'
@@ -145,13 +144,13 @@ def get_user_news_list(request):
         if department:
             department = json.loads(department)
         else:
-            department=[]
+            department = []
     except Exception as err:
         print("获取用户department列表出现错误")
         department = []
         print(err)
     # 有用户id就按照用户id推送，并进行用户画像记录
-    result_list = accord_user_id_get_news_list(user_id, department, channel, flag,main)
+    result_list = accord_user_id_get_news_list(user_id, department, channel, flag, main)
     # else:  # 没有用户id,就按照部门推送，不进行用户画像记录
     #     result_list = channel_branch(channel, branch, flag)
     return HttpResponse(json.dumps(result_list, ensure_ascii=False))
@@ -160,57 +159,127 @@ def get_user_news_list(request):
 # 根据用户id和department和channel获取到新闻推荐的列表
 def accord_user_id_get_news_list(user_id, department, channel, flag, main=0):
     # 在时政要闻和科技热点进行个性化推荐
-    #有空需要进行解耦，频道的名称应该只有数据库有
-    if channel == CHANNEL_SZYW: # 时政要闻
-        result_list = individual(user_id, channel, News, LB=True)#暂时设置全部是带图片的
-    elif channel == CHANNEL_KJRD: # 科技热点
+    # 有空需要进行解耦，频道的名称应该只有数据库有
+    if channel == CHANNEL_SZYW:  # 时政要闻
+        result_list = individual(user_id, channel, News, LB=True)  # 暂时设置全部是带图片的
+    elif channel == CHANNEL_KJRD:  # 科技热点
         result_list = individual(user_id, channel, TECH, LB=True)
     # 中国科协
     elif channel == CHANNEL_ZGKX:
         result_list = search_kx_data_from_mysql(flag)
     # 当前频道为全国学会，并且用户department有学会，就按照department，否则按时间检索
     elif channel == CHANNEL_QGXH:
-        result_list = get_qgxh_news_list(department,main)
+        result_list = get_qgxh_news_list(department, main)
 
     # 当前频道为地方科协，并且用户department有地方科协，就就按照department，否则按时间检索
     elif channel == CHANNEL_DFKX:
-        result_list = get_dfkx_news_list(department,main)
+        result_list = get_dfkx_news_list(department, main)
     elif channel == '战役防控':
         result_list = get_zyfk_news()
-    else :
+    else:
         result_list = []
     return result_list
+
+
+### 额外增加的疫情春节频道
+def get_yqcj_news():
+    result_list = []
+    temp_dict = {}
+    # 疫情春运
+    temp_dict['疫情春运'] = sorted(search_yqcj_news(source='疫情春运'), key=itemgetter('priority', 'news_time'), reverse=True)
+
+    # 中国冬奥
+    temp_dict['中国冬奥'] = sorted(search_yqcj_news(source='中国冬奥'), key=itemgetter('priority', 'news_time'), reverse=True)
+    # # 两翼联动
+    # temp_list = []
+    # temp_list.extend(sorted(search_zyfk_news(source='全国学会'), key=itemgetter('priority', 'news_time'), reverse=True))
+    # temp_list.extend(sorted(search_zyfk_news(source='地方科协'), key=itemgetter('priority', 'news_time'), reverse=True))
+    # temp_dict['两翼联动'] = temp_list
+    # # 应急科普
+    # temp_dict['应急科普'] = sorted(search_zyfk_news(source='应急科普'), key=itemgetter('priority', 'news_time'), reverse=True)
+    # # 答疑解惑
+    # temp_dict['答疑解惑'] = sorted(search_zyfk_news(source='答疑解惑'), key=itemgetter('priority', 'news_time'), reverse=True)
+    # # 抗疫榜样
+    # temp_dict['抗疫榜样'] = sorted(search_zyfk_news(source='抗疫榜样'), key=itemgetter('priority', 'news_time'), reverse=True)
+    # # 媒体报道
+    # temp_dict['媒体报道'] = sorted(search_zyfk_news(source='媒体报道'), key=itemgetter('priority', 'news_time'), reverse=True)
+
+    # banners轮播图
+    temp_dict['banners'] = search_yqcj_news(LB=True)
+
+    return temp_dict
+
+
+def search_yqcj_news(id__list=[], source=None, n=3, LB=False):
+    result = []
+    if LB:
+        try:
+            data = YQCJ.objects.exclude(id__in=id__list).filter(~Q(img=None)).filter(~Q(img='')).filter(
+                ~Q(img=' ')).values_list('id', 'title', 'img', 'time',
+                                         'source', 'priority').order_by('-time')[:n]
+        except:
+            pass
+    else:
+        try:
+            data = YQCJ.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).values_list('id',
+                                                                                                            'title',
+                                                                                                            'img',
+                                                                                                            'time',
+                                                                                                            'source',
+                                                                                                            'priority',
+                                                                                                            ).order_by(
+                '-time')[:n]
+        except Exception as err:
+            print("{0}数据库检索不到数据".format(YQCJ._meta.db_table))
+            print(err)
+
+    if data:
+        for one in data:
+            temp_dict = {}
+            news_id = str(YQCJ._meta.db_table) + '_' + str(one[0])
+            temp_dict['news_id'] = news_id
+            temp_dict['news_title'] = one[1]
+
+            # 在这里要进行img
+            temp_dict['news_img'] = CommonMethod.get_correct_img(one[2])
+            temp_dict['news_time'] = str(one[3])
+            temp_dict['news_source'] = one[4]
+            temp_dict['priority'] = one[5]
+            result.append(temp_dict)
+
+    return result
 
 
 ### 额外增加的战役防控查找
 def get_zyfk_news():
     result_list = []
-    temp_dict ={}
-    #重要发布
+    temp_dict = {}
+    # 重要发布
     temp_dict['重要发布'] = sorted(search_zyfk_news(source='重要发布'), key=itemgetter('priority', 'news_time'), reverse=True)
 
-    #科协要闻
+    # 科协要闻
     temp_dict['科协要闻'] = sorted(search_zyfk_news(source='科协要闻'), key=itemgetter('priority', 'news_time'), reverse=True)
-    #两翼联动
-    temp_list =[]
+    # 两翼联动
+    temp_list = []
     temp_list.extend(sorted(search_zyfk_news(source='全国学会'), key=itemgetter('priority', 'news_time'), reverse=True))
     temp_list.extend(sorted(search_zyfk_news(source='地方科协'), key=itemgetter('priority', 'news_time'), reverse=True))
     temp_dict['两翼联动'] = temp_list
-    #应急科普
+    # 应急科普
     temp_dict['应急科普'] = sorted(search_zyfk_news(source='应急科普'), key=itemgetter('priority', 'news_time'), reverse=True)
-    #答疑解惑
+    # 答疑解惑
     temp_dict['答疑解惑'] = sorted(search_zyfk_news(source='答疑解惑'), key=itemgetter('priority', 'news_time'), reverse=True)
-    #抗疫榜样
+    # 抗疫榜样
     temp_dict['抗疫榜样'] = sorted(search_zyfk_news(source='抗疫榜样'), key=itemgetter('priority', 'news_time'), reverse=True)
-    #媒体报道
+    # 媒体报道
     temp_dict['媒体报道'] = sorted(search_zyfk_news(source='媒体报道'), key=itemgetter('priority', 'news_time'), reverse=True)
     # banners轮播图
     temp_dict['banners'] = search_zyfk_news(LB=True)
 
     return temp_dict
 
-def search_zyfk_news(id__list=[],source=None,n = 3,LB =False):
-    result =[]
+
+def search_zyfk_news(id__list=[], source=None, n=3, LB=False):
+    result = []
     if LB:
         try:
             data = YQFK.objects.exclude(id__in=id__list).filter(~Q(img=None)).filter(~Q(img='')).filter(
@@ -221,17 +290,16 @@ def search_zyfk_news(id__list=[],source=None,n = 3,LB =False):
     else:
         try:
             data = YQFK.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).values_list('id',
-                                                                                                               'title',
-                                                                                                               'img',
-                                                                                                               'time',
-                                                                                                               'source',
-                                                                                                               'priority',
-                                                                                                               ).order_by(
+                                                                                                            'title',
+                                                                                                            'img',
+                                                                                                            'time',
+                                                                                                            'source',
+                                                                                                            'priority',
+                                                                                                            ).order_by(
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(YQFK._meta.db_table))
             print(err)
-
 
     if data:
         for one in data:
@@ -249,8 +317,9 @@ def search_zyfk_news(id__list=[],source=None,n = 3,LB =False):
 
     return result
 
+
 # 个性化推荐算法
-def individual(user_id, channel, mymodel,LB=None):
+def individual(user_id, channel, mymodel, LB=None):
     result_list = []
     # 先检测用户是否存在，不存在就创建新的用户，按照时间返回新闻
     user = search_user_from_momgodb(id=user_id)
@@ -438,12 +507,12 @@ def get_kx_leaders_from_mysql():
 
 
 # 全国学会频道推荐算法
-def get_qgxh_news_list(department=[],main=0):
+def get_qgxh_news_list(department=[], main=0):
     qgxh_dep_numben_list = num_xuehui()
     result_list = []
-    source_list =[]
-    #department不为空
-    if main==str(1):
+    source_list = []
+    # department不为空
+    if main == str(1):
         # 找到用户兼职的所有全国学会单位，并根据这些单位去检索新闻。
         for one_dep in department:
             one_dep = str(one_dep)
@@ -452,15 +521,15 @@ def get_qgxh_news_list(department=[],main=0):
                 result_list.extend(search_data_from_mysql(QGXH, source=source))
         # 如果result_list为空，说明用户没有在全国学会兼职，那么返回数据库最新的新闻
         if not result_list:
-             result_list = sorted(search_data_from_mysql(QGXH), key=itemgetter('priority', 'news_time'), reverse=True)
+            result_list = sorted(search_data_from_mysql(QGXH), key=itemgetter('priority', 'news_time'), reverse=True)
 
     else:
         for one in qgxh_dep_numben_list:
             if int(one) not in department:
                 source_list.append(one)
         for source in source_list:
-            result_list.extend(search_data_from_mysql(QGXH,n=1,source=source))
-    #优先级排序处理
+            result_list.extend(search_data_from_mysql(QGXH, n=1, source=source))
+    # 优先级排序处理
     result_list = sorted(result_list, key=itemgetter('priority', 'news_time'), reverse=True)
 
     if len(result_list) < MAX_NEWS_NUMBER:
@@ -475,12 +544,12 @@ def get_qgxh_news_list(department=[],main=0):
 def get_dfkx_news_list(department=[], main=0):
     dfkx_dep_numben_list = num_dfkx()
     result_dict = {}
-    label_one =[]
+    label_one = []
     label_two = []
     label_three = []
     lb_news = []
-    source_list=[]
-    if main == str(1): # 首页是根据source获取的
+    source_list = []
+    if main == str(1):  # 首页是根据source获取的
         # 找到用户兼职的所有地方科协单位，并根据这些单位去检索新闻。
         for one_dep in department:
             one_dep = str(one_dep)
@@ -488,10 +557,11 @@ def get_dfkx_news_list(department=[], main=0):
                 source = accord_number_get_department(one_dep)
                 source = AgencyDfkx.objects.filter(department=source)[0]
                 # 每个部门都需要检索标签为1.2.3的新闻资讯
-                label_one.extend(search_data_from_mysql(myModel=DFKX, n=MAX_NEWS_NUMBER,source=source, label=1))
-                #这个新闻必须有图片
-                label_two.extend(search_data_from_mysql(myModel=DFKX, n = MAX_NEWS_NUMBER,source=source,label=2, LB=True))
-                label_three.extend(search_data_from_mysql(myModel=DFKX, n =MAX_NEWS_NUMBER,source=source,label=3))
+                label_one.extend(search_data_from_mysql(myModel=DFKX, n=MAX_NEWS_NUMBER, source=source, label=1))
+                # 这个新闻必须有图片
+                label_two.extend(
+                    search_data_from_mysql(myModel=DFKX, n=MAX_NEWS_NUMBER, source=source, label=2, LB=True))
+                label_three.extend(search_data_from_mysql(myModel=DFKX, n=MAX_NEWS_NUMBER, source=source, label=3))
 
         # 如果最基本的3条新闻都没有，那就随便补充新闻了
         if len(label_one) < LIMIT_NEWS:
@@ -535,27 +605,26 @@ def get_dfkx_news_list(department=[], main=0):
             if one_dep in dfkx_dep_numben_list:
                 source = accord_number_get_department(one_dep)
                 source = AgencyDfkx.objects.filter(department=source)[0]
-                lb_news.extend(search_data_from_mysql(myModel=DFKX, n=MAX_NEWS_NUMBER, source=source, id__list=id_list, LB=True))
-        #还是不够，就不在乎source，只需要有图就行
+                lb_news.extend(
+                    search_data_from_mysql(myModel=DFKX, n=MAX_NEWS_NUMBER, source=source, id__list=id_list, LB=True))
+        # 还是不够，就不在乎source，只需要有图就行
         if len(lb_news) < LIMIT_NEWS:
             lb_news.extend(search_data_from_mysql(myModel=DFKX, n=LIMIT_NEWS, id__list=id_list, LB=True))
 
-    else: #main == 0 时，地方科协需要排除原始的source
+    else:  # main == 0 时，地方科协需要排除原始的source
 
         for one in dfkx_dep_numben_list:
             if int(one) not in department:
                 source_list.append(one)
 
-        #对于每一个source_list里面的都检索一条新闻
+        # 对于每一个source_list里面的都检索一条新闻
         for source in source_list:
             source_ = accord_number_get_department(source)
             _source = AgencyDfkx.objects.filter(department=source_)[0]
-            label_one.extend(search_data_from_mysql(myModel=DFKX, n = 1, label=1,source=_source))
-            #这个新闻必须有图片
-            label_two.extend(search_data_from_mysql(myModel=DFKX, n = 1,label=2, LB=True,source=_source))
-            label_three.extend(search_data_from_mysql(myModel=DFKX, n =1,label=3,source=_source))
-
-
+            label_one.extend(search_data_from_mysql(myModel=DFKX, n=1, label=1, source=_source))
+            # 这个新闻必须有图片
+            label_two.extend(search_data_from_mysql(myModel=DFKX, n=1, label=2, LB=True, source=_source))
+            label_three.extend(search_data_from_mysql(myModel=DFKX, n=1, label=3, source=_source))
 
         # 然后排序
         label_one = sorted(label_one, key=itemgetter('priority', 'news_time'), reverse=True)
@@ -578,19 +647,18 @@ def get_dfkx_news_list(department=[], main=0):
         id_list.extend(get_news_id(label_three))
         #
         lb_news.extend(search_data_from_mysql(myModel=DFKX, n=LIMIT_NEWS, id__list=id_list, LB=True))
-        #如果恰好没有，就只能用source 的了
+        # 如果恰好没有，就只能用source 的了
 
         lb_news = sorted(lb_news, key=itemgetter('priority', 'news_time'), reverse=True)
 
-
-    if len(lb_news)>LIMIT_NEWS: #在这里一般只会超出臭猪，
+    if len(lb_news) > LIMIT_NEWS:  # 在这里一般只会超出臭猪，
         lb_news = lb_news[:LIMIT_NEWS]
 
-    #包装返回
-    result_dict['banners'] = lb_news #轮播图
-    result_dict['news'] = label_one # 新闻
-    result_dict['local'] = label_two #地方动态
-    result_dict['provincial'] = label_three #学会
+    # 包装返回
+    result_dict['banners'] = lb_news  # 轮播图
+    result_dict['news'] = label_one  # 新闻
+    result_dict['local'] = label_two  # 地方动态
+    result_dict['provincial'] = label_three  # 学会
 
     return result_dict
 
@@ -604,6 +672,7 @@ def get_news_id(news_list):
         number = news_id[index + 1:]
         id_list.append(int(number))
     return id_list
+
 
 # 根据部门和频道获
 def channel_branch(channel, branch, flag=0):
@@ -729,31 +798,34 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
     ### id__list 和 source__list是默认状态
     if label and source and (not LB):  # label 和source 无图 地方科协1.3
         try:
-            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(label=label).values_list('id',
-                                             'title',
-                                             'img',
-                                             'time',
-                                             'source',
-                                             'comment',
-                                             'like',
-                                             'priority',
-                                             'label').order_by(
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(
+                label=label).values_list('id',
+                                         'title',
+                                         'img',
+                                         'time',
+                                         'source',
+                                         'comment',
+                                         'like',
+                                         'priority',
+                                         'label').order_by(
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
 
     elif label and source and LB:  # 带label source 还有图 地方科协2
         try:
-            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(label=label).filter(~Q(img=None)).filter(
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(
+                label=label).filter(~Q(img=None)).filter(
                 ~Q(img='')).filter(~Q(img=' ')).values_list('id', 'title', 'img', 'time',
                                                             'source', 'comment', 'like',
                                                             'priority', 'label').order_by(
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    elif source and LB:# 只有source和图 地方科协轮播图
+    elif source and LB:  # 只有source和图 地方科协轮播图
         try:
-            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(~Q(img=None)).filter(
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(source=source).filter(
+                ~Q(img=None)).filter(
                 ~Q(img='')).filter(~Q(img=' ')).values_list('id', 'title', 'img', 'time',
                                                             'source', 'comment', 'like',
                                                             'priority', 'label').order_by(
@@ -761,30 +833,31 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
 
-    elif source:#只有source 就可以查到 全国学会
+    elif source:  # 只有source 就可以查到 全国学会
         try:
             data = myModel.objects.filter(hidden=1).filter(source=source).exclude(id__in=id__list).values_list('id',
-                                                                                                             'title',
-                                                                                                             'img',
-                                                                                                             'time',
-                                                                                                             'source',
-                                                                                                             'comment',
-                                                                                                             'like',
-                                                                                                             'priority',
-                                                                                                             'label').order_by(
+                                                                                                               'title',
+                                                                                                               'img',
+                                                                                                               'time',
+                                                                                                               'source',
+                                                                                                               'comment',
+                                                                                                               'like',
+                                                                                                               'priority',
+                                                                                                               'label').order_by(
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    elif LB and label: #只有图和标签，无source 地方科协2（非主）
+    elif LB and label:  # 只有图和标签，无source 地方科协2（非主）
         try:
-            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(label=label).filter(~Q(img=None)).filter(
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(label=label).filter(
+                ~Q(img=None)).filter(
                 ~Q(img='')).filter(~Q(img=' ')).values_list('id', 'title', 'img', 'time',
                                                             'source', 'comment', 'like',
                                                             'priority', 'label').order_by(
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    elif label:#只有label就可以获取到
+    elif label:  # 只有label就可以获取到
         try:
             data = myModel.objects.filter(hidden=1).filter(label=label).exclude(id__in=id__list).values_list('id',
                                                                                                              'title',
@@ -798,22 +871,22 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    elif LB:#只想找有图的
+    elif LB:  # 只想找有图的
         try:
-            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(~Q(img=None)).filter(~Q(img='')).filter(
+            data = myModel.objects.filter(hidden=1).exclude(id__in=id__list).filter(~Q(img=None)).filter(
+                ~Q(img='')).filter(
                 ~Q(img=' ')).values_list('id', 'title', 'img', 'time',
                                          'source', 'comment', 'like',
                                          'priority', 'label').order_by(
                 '-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-    else:#就找数据，无条件
+    else:  # 就找数据，无条件
         try:
             data = myModel.objects.filter(hidden=1).values_list(
-                'id', 'title', 'img','time', 'source', 'comment', 'like', 'priority', 'label').order_by('-time')[:n]
+                'id', 'title', 'img', 'time', 'source', 'comment', 'like', 'priority', 'label').order_by('-time')[:n]
         except Exception as err:
             print("{0}数据库检索不到数据".format(myModel._meta.db_table))
-
 
     if data:
         for one in data:
@@ -822,7 +895,7 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
             temp_dict['news_id'] = news_id
             temp_dict['news_title'] = one[1]
 
-            #在这里要进行img
+            # 在这里要进行img
             temp_dict['news_img'] = CommonMethod.get_correct_img(one[2])
             # temp_dict['news_img'] = '/' + str(one[2])
             temp_dict['news_time'] = str(one[3])
@@ -837,11 +910,11 @@ def search_data_from_mysql(myModel, n=MAX_NEWS_NUMBER, source=None, id__list=[],
 
 
 ####################################获取的中央领导人接口##################################################
-#修改为获取run.log文件的数据
+# 修改为获取run.log文件的数据
 def get_china_top_news(request):
     result_dict = {}
-    dateDict = {'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun',
-                '07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec'}
+    dateDict = {'01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May', '06': 'Jun',
+                '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'}
     with open(RUNPATH, encoding='UTF-8') as f:
         contents = f.read()
         # 当前日期
@@ -854,10 +927,10 @@ def get_china_top_news(request):
             month = dateDict[month]
             day = str(date_2.day) if date_2.day > 9 else '0' + str(date_2.day)
             textTime = day + '/' + month + '/' + year
-            #print(textTime)
+            # print(textTime)
             textTimeCounts = contents.count(textTime)
             result_dict[str(date_2)] = textTimeCounts
-            #if textTimeCounts > 0 :
+            # if textTimeCounts > 0 :
             fisrtIndex = contents.find(textTime) if textTimeCounts > 0 else fisrtIndex
 
             # if 'GET' in content:
@@ -866,16 +939,15 @@ def get_china_top_news(request):
         contents = contents[fisrtIndex:]
 
         allAgency = AgencyJg.objects.values_list()
-        temp_dict ={}
+        temp_dict = {}
         for one in allAgency:
             department = one[2]
             departmentNumber = one[1]
             departmentCounts = contents.count(departmentNumber)
             if departmentCounts > 0:
                 temp_dict[department] = departmentCounts
-        for one in sorted(temp_dict.items(), key=lambda item:item[1], reverse=True):
+        for one in sorted(temp_dict.items(), key=lambda item: item[1], reverse=True):
             result_dict[one[0]] = one[1]
-
 
     # try:
     #     chinaTopNews = ChinaTopNews.objects.all().order_by('-time')[0]
@@ -893,7 +965,7 @@ def get_china_top_news(request):
 ####################################新闻id返回新闻 内容，并记录用户画像###########################################
 # 根据新闻id返回内容,并记录用户画像
 def news_content(request):
-    #没有新闻id直接返回
+    # 没有新闻id直接返回
     try:
         news_id = request.GET.get('news_id')
     except:
@@ -903,7 +975,7 @@ def news_content(request):
     except Exception as err:
         user_id = None
 
-        #print(err)
+        # print(err)
     # 根据新闻id获取到新闻的详情
     news_info_dict = accord_news_id_get_content_list(news_id)
     if not news_info_dict:
@@ -982,9 +1054,9 @@ def update_kxyj_data():
     try:
         news_list = spider.get_kxyj_news()
     except Exception as err:
-        #print('科协一家新闻资讯')
+        # print('科协一家新闻资讯')
         news_list = []
-        #print(err)
+        # print(err)
     # 专家观点
     try:
         news_list.extend(spider.get_kxyj_exp_opi())
@@ -998,7 +1070,7 @@ def update_kxyj_data():
             news = TECH(**one_news)
             try:
                 news.save()
-                #print('Successful')
+                # print('Successful')
             except Exception as err:
                 # print(err)
                 pass
@@ -1011,14 +1083,14 @@ def update_china_top_news():
         data = spider.china_top_news()
         china_top_news = ChinaTopNews(**data)
     except Exception as err:
-        #print('获取置顶的时政新闻失败')
+        # print('获取置顶的时政新闻失败')
         china_top_news = None
-        #print(err)
+        # print(err)
     # 置顶时政新闻入库
     if china_top_news:
         try:
             china_top_news.save()
-            #print('Successful')
+            # print('Successful')
         except Exception as err:
             pass
             # print('插入置顶的时政新闻失败')
@@ -1030,24 +1102,24 @@ def update_kexie_news_into_mysql():
     try:
         news_list = spider.update_kexie_news()
     except Exception as err:
-        #print('selenium获取科协官网失败')
-        #print(err)
+        # print('selenium获取科协官网失败')
+        # print(err)
         try:
             news_list = spider.get_kexie_news_data_list()
         except Exception as err:
             pass
-            #print('bs4获取科协官网失败')
+            # print('bs4获取科协官网失败')
             news_list = []
-            #print(err)
+            # print(err)
     if news_list:
         for one_news in news_list:
             kx = KX(**one_news)
             try:
                 kx.save()
-                #print('Successful')
+                # print('Successful')
             except Exception as e:
                 pass
-                #print(e)
+                # print(e)
     # return HttpResponse('成功')
 
 
@@ -1056,18 +1128,18 @@ def updata_get_rmw_news_data():
     try:
         news_list = spider.get_rmw_news_data()
     except Exception as err:
-        #print('人民网时政数据错误')
+        # print('人民网时政数据错误')
         news_list = None
-        #print(err)
+        # print(err)
     if news_list:
         for one_news in news_list:
             news = News(**one_news)
             try:
                 news.save()
-                #print('Successful')
+                # print('Successful')
             except Exception as e:
                 pass
-                #print(e)
+                # print(e)
     # return HttpResponse('人民网时政新闻入库成功')
     # return render(request,'news.html',{'news_list':news_list})
 
@@ -1077,18 +1149,18 @@ def update_get_rmw_kj_data():
     try:
         news_list = spider.get_rmw_kj_data()
     except Exception as err:
-        #print('人民网科技数据错误')
+        # print('人民网科技数据错误')
         news_list = None
-        #print(err)
+        # print(err)
     if news_list:
         for one_news in news_list:
             news = TECH(**one_news)
             try:
                 news.save()
-                #print('Successful')
+                # print('Successful')
             except Exception as e:
                 pass
-                #print(e)
+                # print(e)
     # return HttpResponse('人民网科技数据入库成功')
 
 
@@ -1097,9 +1169,9 @@ def hanle_cast_into_mysql():
     try:
         handle_cast.start()
     except Exception as err:
-        #pass
+        # pass
         print('清洗cast数据库入库出错')
-        #print(err)
+        # print(err)
     # try:
     #     handle_cast.sz_kj()
     # except Exception as e:
